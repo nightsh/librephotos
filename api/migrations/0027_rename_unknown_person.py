@@ -20,8 +20,7 @@ def unmigrate_unknown(apps, schema_editor):
     Person = apps.get_model("api", "Person")
     try:
         person: Person = Person.objects.get(
-            name=api.models.person.Person.UNKNOWN_PERSON_NAME
-        )
+            name=api.models.person.Person.UNKNOWN_PERSON_NAME)
         person.name = "unknown"
         person.kind = ""
         person.save()

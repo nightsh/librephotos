@@ -61,8 +61,8 @@ def custom_exception_handler(exc, context):
 class AlbumDateListWithPhotoHashViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PigAlbumDateSerializer
     pagination_class = StandardResultsSetPagination
-    filter_backends = (filters.SearchFilter,)
-    ordering_fields = ("photos__exif_timestamp",)
+    filter_backends = (filters.SearchFilter, )
+    ordering_fields = ("photos__exif_timestamp", )
     search_fields = [
         "photos__search_captions",
         "photos__search_location",
@@ -70,33 +70,30 @@ class AlbumDateListWithPhotoHashViewSet(viewsets.ReadOnlyModelViewSet):
     ]
 
     def get_queryset(self):
-        qs = (
-            AlbumDate.objects.filter(
-                Q(owner=self.request.user) & Q(photos__hidden=False)
-            )
-            .exclude(date=None)
-            .annotate(photo_count=Count("photos"))
-            .filter(Q(photo_count__gt=0))
-            .order_by("-date")
-            .prefetch_related(
-                Prefetch(
-                    "photos",
-                    queryset=Photo.visible.filter(Q(owner=self.request.user))
-                    .order_by("-exif_timestamp")
-                    .only("image_hash", "public", "exif_timestamp", "rating", "hidden"),
-                )
-            )
-        )
+        qs = (AlbumDate.objects.filter(
+            Q(owner=self.request.user) & Q(photos__hidden=False)).exclude(
+                date=None).annotate(photo_count=Count("photos")).filter(
+                    Q(photo_count__gt=0)).order_by("-date").prefetch_related(
+                        Prefetch(
+                            "photos",
+                            queryset=Photo.visible.filter(
+                                Q(owner=self.request.user)).order_by(
+                                    "-exif_timestamp").only(
+                                        "image_hash", "public",
+                                        "exif_timestamp", "rating", "hidden"),
+                        )))
         return qs
 
     @cache_response(CACHE_TTL, key_func=CustomObjectKeyConstructor())
     def retrieve(self, *args, **kwargs):
-        return super(AlbumDateListWithPhotoHashViewSet, self).retrieve(*args, **kwargs)
+        return super(AlbumDateListWithPhotoHashViewSet,
+                     self).retrieve(*args, **kwargs)
 
     @cache_response(CACHE_TTL, key_func=CustomListKeyConstructor())
     def list(self, *args, **kwargs):
         start = datetime.datetime.now()
-        res = super(AlbumDateListWithPhotoHashViewSet, self).list(*args, **kwargs)
+        res = super(AlbumDateListWithPhotoHashViewSet,
+                    self).list(*args, **kwargs)
         elapsed = (datetime.datetime.now() - start).total_seconds()
         logger.info("querying & serializing took %.2f seconds" % elapsed)
         return res
@@ -116,16 +113,18 @@ class AlbumUserEditViewSet(viewsets.ModelViewSet):
         return super(AlbumUserEditViewSet, self).list(*args, **kwargs)
 
     def get_queryset(self):
-        return AlbumUser.objects.filter(owner=self.request.user).order_by("title")
+        return AlbumUser.objects.filter(
+            owner=self.request.user).order_by("title")
 
 
 # API Views
 class SiteSettingsView(APIView):
+
     def get_permissions(self):
         if self.request.method == "GET":
-            self.permission_classes = (AllowAny,)
+            self.permission_classes = (AllowAny, )
         else:
-            self.permission_classes = (IsAdminUser,)
+            self.permission_classes = (IsAdminUser, )
 
         return super(SiteSettingsView, self).get_permissions()
 
@@ -148,11 +147,8 @@ class SiteSettingsView(APIView):
             site_config.SKIP_PATTERNS = request.data["skip_patterns"]
         if "heavyweight_process" in request.data.keys():
             HEAVYWEIGHT_PROCESS_ENV = request.data["heavyweight_process"]
-            HEAVYWEIGHT_PROCESS = (
-                int(HEAVYWEIGHT_PROCESS_ENV)
-                if HEAVYWEIGHT_PROCESS_ENV.isnumeric()
-                else 1
-            )
+            HEAVYWEIGHT_PROCESS = (int(HEAVYWEIGHT_PROCESS_ENV) if
+                                   HEAVYWEIGHT_PROCESS_ENV.isnumeric() else 1)
             site_config.HEAVYWEIGHT_PROCESS = HEAVYWEIGHT_PROCESS
         if "map_api_key" in request.data.keys():
             site_config.MAP_API_KEY = request.data["map_api_key"]
@@ -161,6 +157,7 @@ class SiteSettingsView(APIView):
 
 
 class SetUserAlbumShared(APIView):
+
     def post(self, request, format=None):
         data = dict(request.data)
         # print(data)
@@ -172,51 +169,46 @@ class SetUserAlbumShared(APIView):
             target_user = User.objects.get(id=target_user_id)
         except User.DoesNotExist:
             logger.warning(
-                "Cannot share album to user: target user_id {} does not exist".format(
-                    target_user_id
-                )
-            )
-            return Response(
-                {"status": False, "message": "No such user"}, status_code=400
-            )
+                "Cannot share album to user: target user_id {} does not exist".
+                format(target_user_id))
+            return Response({
+                "status": False,
+                "message": "No such user"
+            },
+                status_code=400)
 
         try:
             user_album_to_share = AlbumUser.objects.get(id=user_album_id)
         except AlbumUser.DoesNotExist:
             logger.warning(
-                "Cannot share album to user: source user_album_id {} does not exist".format(
-                    user_album_id
-                )
-            )
-            return Response(
-                {"status": False, "message": "No such album"}, status_code=400
-            )
+                "Cannot share album to user: source user_album_id {} does not exist"
+                .format(user_album_id))
+            return Response({
+                "status": False,
+                "message": "No such album"
+            },
+                status_code=400)
 
         if user_album_to_share.owner != request.user:
             logger.warning(
-                "Cannot share album to user: source user_album_id {} does not belong to user_id {}".format(
-                    user_album_id, request.user.id
-                )
-            )
+                "Cannot share album to user: source user_album_id {} does not belong to user_id {}"
+                .format(user_album_id, request.user.id))
             return Response(
-                {"status": False, "message": "You cannot share an album you don't own"},
+                {
+                    "status": False,
+                    "message": "You cannot share an album you don't own"
+                },
                 status_code=400,
             )
 
         if shared:
             user_album_to_share.shared_to.add(target_user)
-            logger.info(
-                "Shared user {}'s album {} to user {}".format(
-                    request.user.id, user_album_id, target_user_id
-                )
-            )
+            logger.info("Shared user {}'s album {} to user {}".format(
+                request.user.id, user_album_id, target_user_id))
         else:
             user_album_to_share.shared_to.remove(target_user)
-            logger.info(
-                "Unshared user {}'s album {} to user {}".format(
-                    request.user.id, user_album_id, target_user_id
-                )
-            )
+            logger.info("Unshared user {}'s album {} to user {}".format(
+                request.user.id, user_album_id, target_user_id))
 
         user_album_to_share.save()
         cache.clear()
@@ -227,6 +219,7 @@ class SetUserAlbumShared(APIView):
 
 
 class SearchTermExamples(APIView):
+
     def get(self, request, format=None):
         search_term_examples = get_search_term_examples(request.user)
         return Response({"results": search_term_examples})
@@ -234,10 +227,12 @@ class SearchTermExamples(APIView):
 
 # long running jobs
 class ScanPhotosView(APIView):
+
     def get(self, request, format=None):
         try:
             job_id = uuid.uuid4()
-            scan_photos.delay(request.user, False, job_id, request.user.scan_directory)
+            scan_photos.delay(request.user, False, job_id,
+                              request.user.scan_directory)
             return Response({"status": True, "job_id": job_id})
         except BaseException:
             logger.exception("An Error occured")
@@ -246,6 +241,7 @@ class ScanPhotosView(APIView):
 
 # To-Do: Allow for custom paths
 class SelectiveScanPhotosView(APIView):
+
     def get(self, request, format=None):
         # To-Do: Sanatize the scan_directory
         try:
@@ -263,10 +259,12 @@ class SelectiveScanPhotosView(APIView):
 
 
 class FullScanPhotosView(APIView):
+
     def get(self, request, format=None):
         try:
             job_id = uuid.uuid4()
-            scan_photos.delay(request.user, True, job_id, request.user.scan_directory)
+            scan_photos.delay(request.user, True, job_id,
+                              request.user.scan_directory)
             return Response({"status": True, "job_id": job_id})
         except BaseException:
             logger.exception("An Error occured")
@@ -274,6 +272,7 @@ class FullScanPhotosView(APIView):
 
 
 class DeleteMissingPhotosView(APIView):
+
     def get(self, request, format=None):
         try:
             job_id = uuid.uuid4()
@@ -285,7 +284,7 @@ class DeleteMissingPhotosView(APIView):
 
 
 class MediaAccessView(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (AllowAny, )
 
     def _get_protected_media_url(self, path, fname):
         return "protected_media/{}/{}".format(path, fname)
@@ -303,7 +302,8 @@ class MediaAccessView(APIView):
         if photo.public:
             response = HttpResponse()
             response["Content-Type"] = "image/jpeg"
-            response["X-Accel-Redirect"] = self._get_protected_media_url(path, fname)
+            response["X-Accel-Redirect"] = self._get_protected_media_url(
+                path, fname)
             return response
 
         # forbid access if trouble with jwt
@@ -322,16 +322,17 @@ class MediaAccessView(APIView):
         if photo.owner == user or user in photo.shared_to.all():
             response = HttpResponse()
             response["Content-Type"] = "image/jpeg"
-            response["X-Accel-Redirect"] = self._get_protected_media_url(path, fname)
+            response["X-Accel-Redirect"] = self._get_protected_media_url(
+                path, fname)
             return response
         else:
             for album in photo.albumuser_set.only("shared_to"):
                 if user in album.shared_to.all():
                     response = HttpResponse()
                     response["Content-Type"] = "image/jpeg"
-                    response["X-Accel-Redirect"] = self._get_protected_media_url(
-                        path, fname
-                    )
+                    response[
+                        "X-Accel-Redirect"] = self._get_protected_media_url(
+                            path, fname)
                     return response
         return HttpResponse(status=404)
 
@@ -373,7 +374,7 @@ def gen(transcoder):
 
 
 class MediaAccessFullsizeOriginalView(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (AllowAny, )
 
     def _get_protected_media_url(self, path, fname):
         return "/protected_media{}/{}".format(path, fname)
@@ -389,18 +390,17 @@ class MediaAccessFullsizeOriginalView(APIView):
             if "webp" in filename:
                 response["Content-Type"] = "image/webp"
                 response["X-Accel-Redirect"] = self._get_protected_media_url(
-                    path, fname + ".webp"
-                )
+                    path, fname + ".webp")
             if "mp4" in filename:
                 response["Content-Type"] = "video/mp4"
                 response["X-Accel-Redirect"] = self._get_protected_media_url(
-                    path, fname + ".mp4"
-                )
+                    path, fname + ".mp4")
             return response
         if "faces" in path:
             response = HttpResponse()
             response["Content-Type"] = "image/jpg"
-            response["X-Accel-Redirect"] = self._get_protected_media_url(path, fname)
+            response["X-Accel-Redirect"] = self._get_protected_media_url(
+                path, fname)
             return response
         if photo.video:
             # This is probably very slow -> Save the mime type when scanning
@@ -416,15 +416,14 @@ class MediaAccessFullsizeOriginalView(APIView):
                 response = HttpResponse()
                 response["Content-Type"] = filename
                 response["X-Accel-Redirect"] = iri_to_uri(
-                    photo.image_paths[0].replace(
-                        ownphotos.settings.DATA_ROOT, "/original"
-                    )
-                )
+                    photo.image_paths[0].replace(ownphotos.settings.DATA_ROOT,
+                                                 "/original"))
                 return response
         # faces and avatars
         response = HttpResponse()
         response["Content-Type"] = "image/jpg"
-        response["X-Accel-Redirect"] = self._get_protected_media_url(path, fname)
+        response["X-Accel-Redirect"] = self._get_protected_media_url(
+            path, fname)
         return response
 
     def get(self, request, path, fname, format=None):
@@ -438,10 +437,12 @@ class MediaAccessFullsizeOriginalView(APIView):
             else:
                 return HttpResponseForbidden()
             try:
-                user = User.objects.filter(id=token["user_id"]).only("id").first()
+                user = User.objects.filter(
+                    id=token["user_id"]).only("id").first()
                 response = HttpResponse()
                 response["Content-Type"] = "image/png"
-                response["X-Accel-Redirect"] = "/protected_media/" + path + "/" + fname
+                response[
+                    "X-Accel-Redirect"] = "/protected_media/" + path + "/" + fname
                 return response
             except Exception:
                 return HttpResponse(status=404)
@@ -469,21 +470,16 @@ class MediaAccessFullsizeOriginalView(APIView):
             # grant access if the user is owner of the requested photo
             # or the photo is shared with the user
             image_hash = fname.split(".")[0].split("_")[0]  # janky alert
-            user = (
-                User.objects.filter(id=token["user_id"])
-                .only("id", "transcode_videos")
-                .first()
-            )
+            user = (User.objects.filter(id=token["user_id"]).only(
+                "id", "transcode_videos").first())
             if photo.owner == user or user in photo.shared_to.all():
-                return self._generate_response(
-                    photo, path, fname, user.transcode_videos
-                )
+                return self._generate_response(photo, path, fname,
+                                               user.transcode_videos)
             else:
                 for album in photo.albumuser_set.only("shared_to"):
                     if user in album.shared_to.all():
-                        return self._generate_response(
-                            photo, path, fname, user.transcode_videos
-                        )
+                        return self._generate_response(photo, path, fname,
+                                                       user.transcode_videos)
             return HttpResponse(status=404)
         else:
             jwt = request.COOKIES.get("jwt")
@@ -495,9 +491,9 @@ class MediaAccessFullsizeOriginalView(APIView):
 
             if photo.image_paths[0].startswith("/nextcloud_media/"):
                 internal_path = photo.image_paths[0].replace(
-                    "/nextcloud_media/", "/nextcloud_original/"
-                )
-                internal_path = "/nextcloud_original" + photo.image_paths[0][21:]
+                    "/nextcloud_media/", "/nextcloud_original/")
+                internal_path = "/nextcloud_original" + photo.image_paths[0][
+                    21:]
             if photo.image_paths[0].startswith("/data/"):
                 internal_path = "/original" + photo.image_paths[0][5:]
 
@@ -537,14 +533,14 @@ class MediaAccessFullsizeOriginalView(APIView):
 
 
 class ZipListPhotosView(APIView):
+
     def post(self, request, format=None):
         try:
             data = dict(request.data)
             if "image_hashes" not in data:
                 return
             photos = Photo.objects.filter(owner=self.request.user).in_bulk(
-                data["image_hashes"]
-            )
+                data["image_hashes"])
             if len(photos) == 0:
                 return
             mf = io.BytesIO()
@@ -553,16 +549,16 @@ class ZipListPhotosView(APIView):
                 photo_name = os.path.basename(photo.image_paths[0])
                 if photo_name in photos_name:
                     photos_name[photo_name] = photos_name[photo_name] + 1
-                    photo_name = str(photos_name[photo_name]) + "-" + photo_name
+                    photo_name = str(
+                        photos_name[photo_name]) + "-" + photo_name
                 else:
                     photos_name[photo_name] = 1
-                with zipfile.ZipFile(
-                    mf, mode="a", compression=zipfile.ZIP_DEFLATED
-                ) as zf:
+                with zipfile.ZipFile(mf,
+                                     mode="a",
+                                     compression=zipfile.ZIP_DEFLATED) as zf:
                     zf.write(photo.image_paths[0], arcname=photo_name)
-            return HttpResponse(
-                mf.getvalue(), content_type="application/x-zip-compressed"
-            )
+            return HttpResponse(mf.getvalue(),
+                                content_type="application/x-zip-compressed")
         except BaseException as e:
             logger.error(str(e))
             return HttpResponse(status=404)

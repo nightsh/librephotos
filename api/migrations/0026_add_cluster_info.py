@@ -37,18 +37,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="longrunningjob",
             name="job_type",
-            field=models.PositiveIntegerField(
-                choices=[
-                    (1, "Scan Photos"),
-                    (2, "Generate Event Albums"),
-                    (3, "Regenerate Event Titles"),
-                    (4, "Train Faces"),
-                    (5, "Delete Missing Photos"),
-                    (7, "Scan Faces"),
-                    (6, "Calculate Clip Embeddings"),
-                    (8, "Find Similar Faces"),
-                ]
-            ),
+            field=models.PositiveIntegerField(choices=[
+                (1, "Scan Photos"),
+                (2, "Generate Event Albums"),
+                (3, "Regenerate Event Titles"),
+                (4, "Train Faces"),
+                (5, "Delete Missing Photos"),
+                (7, "Scan Faces"),
+                (6, "Calculate Clip Embeddings"),
+                (8, "Find Similar Faces"),
+            ]),
         ),
         migrations.CreateModel(
             name="Cluster",
@@ -70,7 +68,8 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         blank=True,
                         null=True,
-                        on_delete=models.SET(api.models.person.get_unknown_person),
+                        on_delete=models.SET(
+                            api.models.person.get_unknown_person),
                         related_name="clusters",
                         to="api.person",
                     ),

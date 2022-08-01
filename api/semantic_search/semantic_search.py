@@ -45,7 +45,9 @@ class SemanticSearch:
             except PIL.UnidentifiedImageError:
                 logger.info(img_paths)
 
-        imgs_emb = self.model.encode(imgs, batch_size=32, convert_to_tensor=True)
+        imgs_emb = self.model.encode(imgs,
+                                     batch_size=32,
+                                     convert_to_tensor=True)
 
         if type(img_paths) is list:
             magnitudes = map(np.linalg.norm, imgs_emb)
@@ -61,7 +63,8 @@ class SemanticSearch:
         if not self.model_is_loaded:
             self.load()
 
-        query_emb = self.model.encode([query], convert_to_tensor=True)[0].tolist()
+        query_emb = self.model.encode([query],
+                                      convert_to_tensor=True)[0].tolist()
         magnitude = np.linalg.norm(query_emb)
 
         return query_emb, magnitude

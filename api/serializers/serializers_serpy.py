@@ -8,6 +8,7 @@ from api.util import logger
 
 # Serpy is used, because it is way faster when serializing than the django restframework
 class DateTimeField(serpy.Field):
+
     def to_value(self, value):
         try:
             if value:
@@ -27,7 +28,9 @@ class SharedPhotoSuperSimpleSerializer(serpy.Serializer):
     video = serpy.BoolField()
     exif_timestamp = DateTimeField()
     owner = SimpleUserSerializer()
-    shared_to = SimpleUserSerializer(many=True, call=True, attr="shared_to.all")
+    shared_to = SimpleUserSerializer(many=True,
+                                     call=True,
+                                     attr="shared_to.all")
 
 
 class PhotoSuperSimpleSerializer(serpy.Serializer):
@@ -56,7 +59,8 @@ class PigPhotoSerilizer(serpy.Serializer):
     def get_dominant_color(self, obj):
         if obj.dominant_color:
             dominant_color = obj.dominant_color[1:-1]
-            return "#%02x%02x%02x" % tuple(map(int, dominant_color.split(", ")))
+            return "#%02x%02x%02x" % tuple(map(int,
+                                               dominant_color.split(", ")))
         else:
             return ""
 
@@ -170,7 +174,9 @@ class PigAlbumDateSerializer(serpy.Serializer):
 
 
 class AlbumDateListWithPhotoHashSerializer(serpy.Serializer):
-    photos = PhotoSuperSimpleSerializer(many=True, call=True, attr="photos.all")
+    photos = PhotoSuperSimpleSerializer(many=True,
+                                        call=True,
+                                        attr="photos.all")
     location = serpy.Field()
     id = serpy.IntField()
     date = DateTimeField()

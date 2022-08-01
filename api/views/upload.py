@@ -15,6 +15,7 @@ from api.models import Photo, User
 
 
 class UploadPhotoExists(viewsets.ViewSet):
+
     def retrieve(self, request, pk):
         try:
             Photo.objects.get(image_hash=pk)
@@ -45,7 +46,9 @@ class UploadPhotosChunked(ChunkedUploadView):
         """
         chunked_upload = self.model(**attrs)
         # file starts empty
-        chunked_upload.file.save(name="tmp", content=ContentFile(""), save=save)
+        chunked_upload.file.save(name="tmp",
+                                 content=ContentFile(""),
+                                 save=save)
         return chunked_upload
 
 
@@ -72,34 +75,32 @@ class UploadPhotosChunkedComplete(ChunkedUploadCompleteView):
 
         if not os.path.exists(os.path.join(user.scan_directory, "uploads")):
             os.mkdir(os.path.join(user.scan_directory, "uploads"))
-        if not os.path.exists(os.path.join(user.scan_directory, "uploads", device)):
+        if not os.path.exists(
+                os.path.join(user.scan_directory, "uploads", device)):
             os.mkdir(os.path.join(user.scan_directory, "uploads", device))
         photo = uploaded_file
         image_hash = calculate_hash_b64(user, io.BytesIO(photo.read()))
         if not Photo.objects.filter(image_hash=image_hash).exists():
             if not os.path.exists(
-                os.path.join(user.scan_directory, "uploads", device, filename)
-            ):
-                photo_path = os.path.join(
-                    user.scan_directory, "uploads", device, filename
-                )
+                    os.path.join(user.scan_directory, "uploads", device,
+                                 filename)):
+                photo_path = os.path.join(user.scan_directory, "uploads",
+                                          device, filename)
             else:
                 existing_photo_hash = calculate_hash_b64(
-                    os.path.join(user.scan_directory, "uploads", device, filename)
-                )
+                    os.path.join(user.scan_directory, "uploads", device,
+                                 filename))
                 if existing_photo_hash == image_hash:
                     # File already exist, do not copy it in the upload folder
                     photo_path = ""
                 else:
-                    photo_path = os.path.join(
-                        user.scan_directory, "uploads", device, image_hash
-                    )
+                    photo_path = os.path.join(user.scan_directory, "uploads",
+                                              device, image_hash)
 
             if photo_path:
                 with open(photo_path, "wb") as f:
                     photo.seek(0)
                     f.write(photo.read())
             chunked_upload = get_object_or_404(
-                ChunkedUpload, upload_id=request.POST.get("upload_id")
-            )
+                ChunkedUpload, upload_id=request.POST.get("upload_id"))
             chunked_upload.delete(delete_file=True)

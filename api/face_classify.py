@@ -30,7 +30,10 @@ FACE_CLASSIFY_COLUMNS = [
 
 def cluster_faces(user, inferred=True):
     # for front end cluster visualization
-    persons = [p.id for p in Person.objects.filter(faces__photo__owner=user).distinct()]
+    persons = [
+        p.id
+        for p in Person.objects.filter(faces__photo__owner=user).distinct()
+    ]
     p2c = dict(zip(persons, sns.color_palette(n_colors=len(persons)).as_hex()))
 
     face_encoding = []
@@ -45,16 +48,18 @@ def cluster_faces(user, inferred=True):
 
     res = []
     for face, vis in zip(faces, vis_all):
-        res.append(
-            {
-                "person_id": face.person.id,
-                "person_name": face.person.name,
-                "person_label_is_inferred": face.person_label_is_inferred,
-                "color": p2c[face.person.id],
-                "face_url": face.image.url,
-                "value": {"x": vis[0], "y": vis[1], "size": vis[2]},
-            }
-        )
+        res.append({
+            "person_id": face.person.id,
+            "person_name": face.person.name,
+            "person_label_is_inferred": face.person_label_is_inferred,
+            "color": p2c[face.person.id],
+            "face_url": face.image.url,
+            "value": {
+                "x": vis[0],
+                "y": vis[1],
+                "size": vis[2]
+            },
+        })
     return res
 
 
@@ -88,7 +93,12 @@ def cluster_all_faces(user, job_id) -> bool:
         lrj.finished = True
         lrj.failed = False
         lrj.finished_at = datetime.datetime.now().replace(tzinfo=pytz.utc)
-        lrj.result = {"progress": {"current": target_count, "target": target_count}}
+        lrj.result = {
+            "progress": {
+                "current": target_count,
+                "target": target_count
+            }
+        }
         lrj.save()
         cache.clear()
 
@@ -116,9 +126,13 @@ def create_all_clusters(user: User, lrj: LongRunningJob = None) -> int:
     print("[INFO] Creating clusters")
 
     data = {
-        "all": {"encoding": [], "id": []},
+        "all": {
+            "encoding": [],
+            "id": []
+        },
     }
-    for face in Face.objects.filter(photo__owner=user).prefetch_related("person"):
+    for face in Face.objects.filter(
+            photo__owner=user).prefetch_related("person"):
         data["all"]["encoding"].append(face.get_encoding_array())
         data["all"]["id"].append(face.id)
 
@@ -145,13 +159,18 @@ def create_all_clusters(user: User, lrj: LongRunningJob = None) -> int:
             face_id_list.append(face_id)
         face_array = Face.objects.filter(pk__in=face_id_list)
         new_clusters: list[Cluster] = ClusterManager.try_add_cluster(
-            user, labelID, face_array
-        )
+            user, labelID, face_array)
 
         if commit_time < datetime.datetime.now() and lrj is not None:
-            lrj.result = {"progress": {"current": count, "target": target_count}}
+            lrj.result = {
+                "progress": {
+                    "current": count,
+                    "target": target_count
+                }
+            }
             lrj.save()
-            commit_time = datetime.datetime.now() + datetime.timedelta(seconds=5)
+            commit_time = datetime.datetime.now() + datetime.timedelta(
+                seconds=5)
 
         all_clusters.extend(new_clusters)
 
@@ -169,7 +188,8 @@ def delete_clusters(user: User):
 def delete_clustered_people(user: User):
     """Delete all existing Person records of type CLUSTER"""
     print("[INFO] Deleting all clustered people")
-    Person.objects.filter(kind=Person.KIND_CLUSTER, cluster_owner=user).delete()
+    Person.objects.filter(kind=Person.KIND_CLUSTER,
+                          cluster_owner=user).delete()
 
 
 @job
@@ -198,22 +218,27 @@ def train_faces(user: User, job_id) -> bool:
     unknown_person: Person = get_unknown_person()
     try:
         data = {
-            "known": {"encoding": [], "id": []},
-            "unknown": {"encoding": [], "id": []},
+            "known": {
+                "encoding": [],
+                "id": []
+            },
+            "unknown": {
+                "encoding": [],
+                "id": []
+            },
         }
         # First, sort all faces into known and unknown ones
         face: Face
         for face in Face.objects.filter(
-            Q(photo__owner=user) & ~Q(person=unknown_person)
-        ).prefetch_related("person"):
+                Q(photo__owner=user)
+                & ~Q(person=unknown_person)).prefetch_related("person"):
             person: Person = face.person
-            unknown = (
-                face.person_label_is_inferred is not False
-                or person.kind == Person.KIND_CLUSTER
-            )
+            unknown = (face.person_label_is_inferred is not False
+                       or person.kind == Person.KIND_CLUSTER)
             data_type = "unknown" if unknown else "known"
             data[data_type]["encoding"].append(face.get_encoding_array())
-            data[data_type]["id"].append(face.id if unknown else face.person.id)
+            data[data_type]["id"].append(
+                face.id if unknown else face.person.id)
 
         # Next, pretend all unknown face clusters are known and add their mean encoding. This allows us
         # to predict the likelihood of other unknown faces belonging to those simulated clusters. For
@@ -222,7 +247,8 @@ def train_faces(user: User, job_id) -> bool:
         cluster: Cluster
         for cluster in Cluster.objects.filter(owner=user):
             if cluster.person.kind == Person.KIND_CLUSTER:
-                data["known"]["encoding"].append(cluster.get_mean_encoding_array())
+                data["known"]["encoding"].append(
+                    cluster.get_mean_encoding_array())
                 data["known"]["id"].append(cluster.person.id)
 
         if len(data["known"]["id"]) == 0:
@@ -236,23 +262,27 @@ def train_faces(user: User, job_id) -> bool:
 
             # Fit the classifier based on the "known" faces, including the simulated clusters
             logger.debug("Before fitting")
-            clf = MLPClassifier(
-                solver="adam", alpha=1e-5, random_state=1, max_iter=1000
-            ).fit(np.array(data["known"]["encoding"]), np.array(data["known"]["id"]))
+            clf = MLPClassifier(solver="adam",
+                                alpha=1e-5,
+                                random_state=1,
+                                max_iter=1000).fit(
+                                    np.array(data["known"]["encoding"]),
+                                    np.array(data["known"]["id"]))
             logger.debug("After fitting")
 
             # Collect the probabilities for each unknown face. The probabilities returned
             # are arrays in the same order as the people IDs in the original training set
             target_count = len(data["unknown"]["id"])
             if target_count != 0:
-                face_encodings_unknown_np = np.array(data["unknown"]["encoding"])
+                face_encodings_unknown_np = np.array(
+                    data["unknown"]["encoding"])
                 probs = clf.predict_proba(face_encodings_unknown_np)
 
-                commit_time = datetime.datetime.now() + datetime.timedelta(seconds=5)
+                commit_time = datetime.datetime.now() + datetime.timedelta(
+                    seconds=5)
                 face_stack = []
                 for idx, (face_id, probability_array) in enumerate(
-                    zip(data["unknown"]["id"], probs)
-                ):
+                        zip(data["unknown"]["id"], probs)):
                     face = Face.objects.get(id=face_id)
                     face.person_label_is_inferred = True
                     probability: np.float64 = 0
@@ -267,21 +297,29 @@ def train_faces(user: User, job_id) -> bool:
                     face_stack.append(face)
                     if commit_time < datetime.datetime.now():
                         lrj.result = {
-                            "progress": {"current": idx + 1, "target": target_count}
+                            "progress": {
+                                "current": idx + 1,
+                                "target": target_count
+                            }
                         }
                         lrj.save()
-                        commit_time = datetime.datetime.now() + datetime.timedelta(
-                            seconds=5
-                        )
+                        commit_time = datetime.datetime.now(
+                        ) + datetime.timedelta(seconds=5)
                     if len(face_stack) > 200:
-                        bulk_update(face_stack, update_fields=FACE_CLASSIFY_COLUMNS)
+                        bulk_update(face_stack,
+                                    update_fields=FACE_CLASSIFY_COLUMNS)
                         face_stack = []
 
                 bulk_update(face_stack, update_fields=FACE_CLASSIFY_COLUMNS)
 
             lrj.finished = True
             lrj.failed = False
-            lrj.result = {"progress": {"current": target_count, "target": target_count}}
+            lrj.result = {
+                "progress": {
+                    "current": target_count,
+                    "target": target_count
+                }
+            }
             lrj.finished_at = datetime.datetime.now().replace(tzinfo=pytz.utc)
             lrj.save()
             return True

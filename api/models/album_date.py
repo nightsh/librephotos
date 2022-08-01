@@ -6,28 +6,28 @@ from api.models.user import User, get_deleted_user
 
 
 class VisibleAlbumDatePhotoManager(models.Manager):
+
     def get_queryset(self):
-        return (
-            super()
-            .get_queryset()
-            .filter(
-                Q(photos__hidden=False)
-                & Q(photos__aspect_ratio__isnull=False)
-                & Q(photos__deleted=False)
-            )
-        )
+        return (super().get_queryset().filter(
+            Q(photos__hidden=False)
+            & Q(photos__aspect_ratio__isnull=False)
+            & Q(photos__deleted=False)))
 
 
 class AlbumDate(models.Model):
-    title = models.CharField(blank=True, null=True, max_length=512, db_index=True)
+    title = models.CharField(blank=True,
+                             null=True,
+                             max_length=512,
+                             db_index=True)
     date = models.DateField(db_index=True, null=True)
     photos = models.ManyToManyField(Photo)
     favorited = models.BooleanField(default=False, db_index=True)
     location = models.JSONField(blank=True, db_index=True, null=True)
-    owner = models.ForeignKey(
-        User, on_delete=models.SET(get_deleted_user), default=None
-    )
-    shared_to = models.ManyToManyField(User, related_name="album_date_shared_to")
+    owner = models.ForeignKey(User,
+                              on_delete=models.SET(get_deleted_user),
+                              default=None)
+    shared_to = models.ManyToManyField(User,
+                                       related_name="album_date_shared_to")
     visible = VisibleAlbumDatePhotoManager()
     objects = models.Manager()
 

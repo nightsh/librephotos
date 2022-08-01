@@ -14,8 +14,10 @@ class Migration(migrations.Migration):
             for obj in Photo.objects.all():
                 if obj.thumbnail_big:
                     try:
-                        height = et.get_tag("ImageHeight", obj.thumbnail_big.path)
-                        width = et.get_tag("ImageWidth", obj.thumbnail_big.path)
+                        height = et.get_tag("ImageHeight",
+                                            obj.thumbnail_big.path)
+                        width = et.get_tag("ImageWidth",
+                                           obj.thumbnail_big.path)
                         obj.aspect_ratio = round((width / height), 2)
                         obj.save()
                     except Exception:

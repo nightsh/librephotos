@@ -34,12 +34,13 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("password", models.CharField(max_length=128, verbose_name="password")),
+                ("password",
+                 models.CharField(max_length=128, verbose_name="password")),
                 (
                     "last_login",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="last login"
-                    ),
+                    models.DateTimeField(blank=True,
+                                         null=True,
+                                         verbose_name="last login"),
                 ),
                 (
                     "is_superuser",
@@ -53,34 +54,36 @@ class Migration(migrations.Migration):
                     "username",
                     models.CharField(
                         error_messages={
-                            "unique": "A user with that username already exists."
+                            "unique":
+                            "A user with that username already exists."
                         },
                         help_text="Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
                         max_length=150,
                         unique=True,
                         validators=[
-                            django.contrib.auth.validators.UnicodeUsernameValidator()
+                            django.contrib.auth.validators.
+                            UnicodeUsernameValidator()
                         ],
                         verbose_name="username",
                     ),
                 ),
                 (
                     "first_name",
-                    models.CharField(
-                        blank=True, max_length=30, verbose_name="first name"
-                    ),
+                    models.CharField(blank=True,
+                                     max_length=30,
+                                     verbose_name="first name"),
                 ),
                 (
                     "last_name",
-                    models.CharField(
-                        blank=True, max_length=150, verbose_name="last name"
-                    ),
+                    models.CharField(blank=True,
+                                     max_length=150,
+                                     verbose_name="last name"),
                 ),
                 (
                     "email",
-                    models.EmailField(
-                        blank=True, max_length=254, verbose_name="email address"
-                    ),
+                    models.EmailField(blank=True,
+                                      max_length=254,
+                                      verbose_name="email address"),
                 ),
                 (
                     "is_staff",
@@ -100,11 +103,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "date_joined",
-                    models.DateTimeField(
-                        default=django.utils.timezone.now, verbose_name="date joined"
-                    ),
+                    models.DateTimeField(default=django.utils.timezone.now,
+                                         verbose_name="date joined"),
                 ),
-                ("scan_directory", models.CharField(db_index=True, max_length=512)),
+                ("scan_directory",
+                 models.CharField(db_index=True, max_length=512)),
                 ("avatar", models.ImageField(null=True, upload_to="avatars")),
                 (
                     "nextcloud_server_address",
@@ -117,8 +120,9 @@ class Migration(migrations.Migration):
                 (
                     "nextcloud_app_password",
                     django_cryptography.fields.encrypt(
-                        models.CharField(default=None, max_length=64, null=True)
-                    ),
+                        models.CharField(default=None,
+                                         max_length=64,
+                                         null=True)),
                 ),
                 (
                     "nextcloud_scan_directory",
@@ -168,12 +172,14 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("title", models.CharField(blank=True, max_length=512, null=True)),
+                ("title",
+                 models.CharField(blank=True, max_length=512, null=True)),
                 ("timestamp", models.DateTimeField(db_index=True)),
                 ("created_on", models.DateTimeField(db_index=True)),
                 ("gps_lat", models.FloatField(blank=True, null=True)),
                 ("gps_lon", models.FloatField(blank=True, null=True)),
-                ("favorited", models.BooleanField(db_index=True, default=False)),
+                ("favorited", models.BooleanField(db_index=True,
+                                                  default=False)),
                 (
                     "owner",
                     models.ForeignKey(
@@ -198,17 +204,18 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "title",
-                    models.CharField(
-                        blank=True, db_index=True, max_length=512, null=True
-                    ),
+                    models.CharField(blank=True,
+                                     db_index=True,
+                                     max_length=512,
+                                     null=True),
                 ),
                 ("date", models.DateField(db_index=True, null=True)),
-                ("favorited", models.BooleanField(db_index=True, default=False)),
+                ("favorited", models.BooleanField(db_index=True,
+                                                  default=False)),
                 (
                     "location",
                     django.contrib.postgres.fields.jsonb.JSONField(
-                        blank=True, db_index=True, null=True
-                    ),
+                        blank=True, db_index=True, null=True),
                 ),
                 (
                     "owner",
@@ -233,8 +240,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("title", models.CharField(db_index=True, max_length=512)),
-                ("geolocation_level", models.IntegerField(db_index=True, null=True)),
-                ("favorited", models.BooleanField(db_index=True, default=False)),
+                ("geolocation_level",
+                 models.IntegerField(db_index=True, null=True)),
+                ("favorited", models.BooleanField(db_index=True,
+                                                  default=False)),
             ],
         ),
         migrations.CreateModel(
@@ -254,7 +263,8 @@ class Migration(migrations.Migration):
                     "thing_type",
                     models.CharField(db_index=True, max_length=512, null=True),
                 ),
-                ("favorited", models.BooleanField(db_index=True, default=False)),
+                ("favorited", models.BooleanField(db_index=True,
+                                                  default=False)),
             ],
         ),
         migrations.CreateModel(
@@ -270,8 +280,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("title", models.CharField(max_length=512)),
-                ("created_on", models.DateTimeField(auto_now=True, db_index=True)),
-                ("favorited", models.BooleanField(db_index=True, default=False)),
+                ("created_on",
+                 models.DateTimeField(auto_now=True, db_index=True)),
+                ("favorited", models.BooleanField(db_index=True,
+                                                  default=False)),
                 ("public", models.BooleanField(db_index=True, default=False)),
             ],
         ),
@@ -289,7 +301,8 @@ class Migration(migrations.Migration):
                 ),
                 ("image", models.ImageField(upload_to="faces")),
                 ("image_path", models.FilePathField()),
-                ("person_label_is_inferred", models.NullBooleanField(db_index=True)),
+                ("person_label_is_inferred",
+                 models.NullBooleanField(db_index=True)),
                 (
                     "person_label_probability",
                     models.FloatField(db_index=True, default=0.0),
@@ -315,26 +328,26 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "job_type",
-                    models.PositiveIntegerField(
-                        choices=[
-                            (1, "Scan Photos"),
-                            (2, "Generate Event Albums"),
-                            (3, "Regenerate Event Titles"),
-                            (4, "Train Faces"),
-                        ]
-                    ),
+                    models.PositiveIntegerField(choices=[
+                        (1, "Scan Photos"),
+                        (2, "Generate Event Albums"),
+                        (3, "Regenerate Event Titles"),
+                        (4, "Train Faces"),
+                    ]),
                 ),
                 ("finished", models.BooleanField(default=False)),
                 ("failed", models.BooleanField(default=False)),
-                ("job_id", models.CharField(db_index=True, max_length=36, unique=True)),
-                ("queued_at", models.DateTimeField(default=datetime.datetime.now)),
+                ("job_id",
+                 models.CharField(db_index=True, max_length=36, unique=True)),
+                ("queued_at",
+                 models.DateTimeField(default=datetime.datetime.now)),
                 ("started_at", models.DateTimeField(null=True)),
                 ("finished_at", models.DateTimeField(null=True)),
                 (
                     "result",
                     django.contrib.postgres.fields.jsonb.JSONField(
-                        default=api.models.long_running_job.get_default_longrunningjob_result
-                    ),
+                        default=api.models.long_running_job.
+                        get_default_longrunningjob_result),
                 ),
                 (
                     "started_by",
@@ -386,16 +399,23 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Photo",
             fields=[
-                ("image_path", models.CharField(db_index=True, max_length=512)),
+                ("image_path", models.CharField(db_index=True,
+                                                max_length=512)),
                 (
                     "image_hash",
-                    models.CharField(max_length=64, primary_key=True, serialize=False),
+                    models.CharField(max_length=64,
+                                     primary_key=True,
+                                     serialize=False),
                 ),
                 ("thumbnail", models.ImageField(upload_to="thumbnails")),
-                ("thumbnail_tiny", models.ImageField(upload_to="thumbnails_tiny")),
-                ("thumbnail_small", models.ImageField(upload_to="thumbnails_small")),
-                ("thumbnail_big", models.ImageField(upload_to="thumbnails_big")),
-                ("square_thumbnail", models.ImageField(upload_to="square_thumbnails")),
+                ("thumbnail_tiny",
+                 models.ImageField(upload_to="thumbnails_tiny")),
+                ("thumbnail_small",
+                 models.ImageField(upload_to="thumbnails_small")),
+                ("thumbnail_big",
+                 models.ImageField(upload_to="thumbnails_big")),
+                ("square_thumbnail",
+                 models.ImageField(upload_to="square_thumbnails")),
                 (
                     "square_thumbnail_tiny",
                     models.ImageField(upload_to="square_thumbnails_tiny"),
@@ -418,21 +438,18 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "exif_json",
-                    django.contrib.postgres.fields.jsonb.JSONField(
-                        blank=True, null=True
-                    ),
+                    django.contrib.postgres.fields.jsonb.JSONField(blank=True,
+                                                                   null=True),
                 ),
                 (
                     "geolocation_json",
                     django.contrib.postgres.fields.jsonb.JSONField(
-                        blank=True, db_index=True, null=True
-                    ),
+                        blank=True, db_index=True, null=True),
                 ),
                 (
                     "captions_json",
                     django.contrib.postgres.fields.jsonb.JSONField(
-                        blank=True, db_index=True, null=True
-                    ),
+                        blank=True, db_index=True, null=True),
                 ),
                 (
                     "search_captions",
@@ -442,7 +459,8 @@ class Migration(migrations.Migration):
                     "search_location",
                     models.TextField(blank=True, db_index=True, null=True),
                 ),
-                ("favorited", models.BooleanField(db_index=True, default=False)),
+                ("favorited", models.BooleanField(db_index=True,
+                                                  default=False)),
                 ("hidden", models.BooleanField(db_index=True, default=False)),
                 ("public", models.BooleanField(db_index=True, default=False)),
                 ("encoding", models.TextField(default=None, null=True)),
@@ -456,9 +474,8 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "shared_to",
-                    models.ManyToManyField(
-                        related_name="photo_shared_to", to=settings.AUTH_USER_MODEL
-                    ),
+                    models.ManyToManyField(related_name="photo_shared_to",
+                                           to=settings.AUTH_USER_MODEL),
                 ),
             ],
         ),
@@ -485,8 +502,7 @@ class Migration(migrations.Migration):
             model_name="albumuser",
             name="cover_photos",
             field=models.ManyToManyField(
-                related_name="album_user_cover_photos", to="api.Photo"
-            ),
+                related_name="album_user_cover_photos", to="api.Photo"),
         ),
         migrations.AddField(
             model_name="albumuser",
@@ -505,16 +521,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="albumuser",
             name="shared_to",
-            field=models.ManyToManyField(
-                related_name="album_user_shared_to", to=settings.AUTH_USER_MODEL
-            ),
+            field=models.ManyToManyField(related_name="album_user_shared_to",
+                                         to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name="albumthing",
             name="cover_photos",
             field=models.ManyToManyField(
-                related_name="album_thing_cover_photos", to="api.Photo"
-            ),
+                related_name="album_thing_cover_photos", to="api.Photo"),
         ),
         migrations.AddField(
             model_name="albumthing",
@@ -533,16 +547,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="albumthing",
             name="shared_to",
-            field=models.ManyToManyField(
-                related_name="album_thing_shared_to", to=settings.AUTH_USER_MODEL
-            ),
+            field=models.ManyToManyField(related_name="album_thing_shared_to",
+                                         to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name="albumplace",
             name="cover_photos",
             field=models.ManyToManyField(
-                related_name="album_place_cover_photos", to="api.Photo"
-            ),
+                related_name="album_place_cover_photos", to="api.Photo"),
         ),
         migrations.AddField(
             model_name="albumplace",
@@ -561,9 +573,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="albumplace",
             name="shared_to",
-            field=models.ManyToManyField(
-                related_name="album_place_shared_to", to=settings.AUTH_USER_MODEL
-            ),
+            field=models.ManyToManyField(related_name="album_place_shared_to",
+                                         to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name="albumdate",
@@ -573,9 +584,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="albumdate",
             name="shared_to",
-            field=models.ManyToManyField(
-                related_name="album_date_shared_to", to=settings.AUTH_USER_MODEL
-            ),
+            field=models.ManyToManyField(related_name="album_date_shared_to",
+                                         to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name="albumauto",
@@ -585,9 +595,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="albumauto",
             name="shared_to",
-            field=models.ManyToManyField(
-                related_name="album_auto_shared_to", to=settings.AUTH_USER_MODEL
-            ),
+            field=models.ManyToManyField(related_name="album_auto_shared_to",
+                                         to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterUniqueTogether(
             name="albumuser",

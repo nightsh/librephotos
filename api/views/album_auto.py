@@ -18,24 +18,17 @@ class AlbumAutoViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
-        return (
-            AlbumAuto.objects.annotate(
-                photo_count=Count(
-                    "photos", filter=Q(photos__hidden=False), distinct=True
-                )
-            )
-            .filter(Q(photo_count__gt=0) & Q(owner=self.request.user))
-            .prefetch_related(
-                Prefetch(
-                    "photos",
-                    queryset=Photo.objects.filter(hidden=False).only(
-                        "image_hash", "public", "rating", "hidden", "exif_timestamp"
-                    ),
-                )
-            )
-            .only("id", "title", "timestamp", "created_on", "gps_lat", "gps_lon")
-            .order_by("-timestamp")
-        )
+        return (AlbumAuto.objects.annotate(photo_count=Count(
+            "photos", filter=Q(photos__hidden=False), distinct=True)).filter(
+                Q(photo_count__gt=0)
+                & Q(owner=self.request.user)).prefetch_related(
+                    Prefetch(
+                        "photos",
+                        queryset=Photo.objects.filter(hidden=False).only(
+                            "image_hash", "public", "rating", "hidden",
+                            "exif_timestamp"),
+                    )).only("id", "title", "timestamp", "created_on",
+                            "gps_lat", "gps_lon").order_by("-timestamp"))
 
     @action(detail=False, methods=["post"])
     def delete_all(self, request):
@@ -52,7 +45,7 @@ class AlbumAutoViewSet(viewsets.ModelViewSet):
 class AlbumAutoListViewSet(viewsets.ModelViewSet):
     serializer_class = AlbumAutoListSerializer
     pagination_class = StandardResultsSetPagination
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, )
     search_fields = [
         "photos__search_captions",
         "photos__search_location",
@@ -60,18 +53,12 @@ class AlbumAutoListViewSet(viewsets.ModelViewSet):
     ]
 
     def get_queryset(self):
-        return (
-            AlbumAuto.objects.annotate(
-                photo_count=Count(
-                    "photos", filter=Q(photos__hidden=False), distinct=True
-                )
-            )
-            .filter(Q(photo_count__gt=0) & Q(owner=self.request.user))
-            .order_by("-timestamp")
-            .prefetch_related(
-                Prefetch("photos", queryset=Photo.visible.only("image_hash", "video"))
-            )
-        )
+        return (AlbumAuto.objects.annotate(photo_count=Count(
+            "photos", filter=Q(photos__hidden=False), distinct=True
+        )).filter(Q(photo_count__gt=0) & Q(
+            owner=self.request.user)).order_by("-timestamp").prefetch_related(
+                Prefetch("photos",
+                         queryset=Photo.visible.only("image_hash", "video"))))
 
     def retrieve(self, *args, **kwargs):
         return super(AlbumAutoListViewSet, self).retrieve(*args, **kwargs)
@@ -81,6 +68,7 @@ class AlbumAutoListViewSet(viewsets.ModelViewSet):
 
 
 class RegenerateAutoAlbumTitles(APIView):
+
     def get(self, request, format=None):
         try:
             job_id = uuid.uuid4()
@@ -92,6 +80,7 @@ class RegenerateAutoAlbumTitles(APIView):
 
 
 class AutoAlbumGenerateView(APIView):
+
     def get(self, request, format=None):
         try:
             job_id = uuid.uuid4()

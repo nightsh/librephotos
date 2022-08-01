@@ -10,15 +10,17 @@ from api.models.photo import Photo
 
 
 class Face(models.Model):
-    photo = models.ForeignKey(
-        Photo, related_name="faces", on_delete=models.CASCADE, blank=False, null=True
-    )
+    photo = models.ForeignKey(Photo,
+                              related_name="faces",
+                              on_delete=models.CASCADE,
+                              blank=False,
+                              null=True)
     image = models.ImageField(upload_to="faces", null=True)
     image_path = models.FilePathField()
 
-    person = models.ForeignKey(
-        Person, on_delete=models.SET(get_unknown_person), related_name="faces"
-    )
+    person = models.ForeignKey(Person,
+                               on_delete=models.SET(get_unknown_person),
+                               related_name="faces")
 
     cluster = models.ForeignKey(
         Cluster,

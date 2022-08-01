@@ -57,8 +57,7 @@ def mapbox_reverse_geocode(lat, lon):
 
     url = (
         "https://api.mapbox.com/geocoding/v5/mapbox.places/%f,%f.json?access_token=%s"
-        % (lon, lat, mapbox_api_key)
-    )
+        % (lon, lat, mapbox_api_key))
     resp = requests.get(url)
     if resp.status_code == 200:
         resp_json = resp.json()
@@ -72,7 +71,8 @@ def mapbox_reverse_geocode(lat, lon):
         return resp_json
     else:
         # logger.info('mapbox returned non 200 response.')
-        logger.warning("mapbox returned status {} response.".format(resp.status_code))
+        logger.warning("mapbox returned status {} response.".format(
+            resp.status_code))
         return {}
 
 
@@ -97,8 +97,7 @@ exiftool_instance = exiftool.ExifTool()
 def _get_existing_metadata_files_reversed(media_file, include_sidecar_files):
     if include_sidecar_files:
         files = [
-            file
-            for file in get_sidecar_files_in_priority_order(media_file)
+            file for file in get_sidecar_files_in_priority_order(media_file)
             if os.path.exists(file)
         ]
         files.append(media_file)
@@ -127,8 +126,7 @@ def get_metadata(media_file, tags, try_sidecar=True):
         terminate_et = True
 
     files_by_reverse_priority = _get_existing_metadata_files_reversed(
-        media_file, try_sidecar
-    )
+        media_file, try_sidecar)
 
     values = []
     try:
@@ -159,7 +157,9 @@ def write_metadata(media_file, tags, use_sidecar=True):
 
     try:
         logger.info(f"Writing {tags} to {file_path}")
-        params = [os.fsencode(f"-{tag}={value}") for tag, value in tags.items()]
+        params = [
+            os.fsencode(f"-{tag}={value}") for tag, value in tags.items()
+        ]
         params.append(b"-overwrite_original")
         params.append(os.fsencode(file_path))
         et.execute(*params)

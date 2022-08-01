@@ -30,9 +30,7 @@ class LongRunningJob(models.Model):
         (JOB_CLUSTER_ALL_FACES, "Find Similar Faces"),
     )
 
-    job_type = models.PositiveIntegerField(
-        choices=JOB_TYPES,
-    )
+    job_type = models.PositiveIntegerField(choices=JOB_TYPES, )
 
     finished = models.BooleanField(default=False, blank=False, null=False)
     failed = models.BooleanField(default=False, blank=False, null=False)
@@ -40,9 +38,9 @@ class LongRunningJob(models.Model):
     queued_at = models.DateTimeField(default=datetime.now, null=False)
     started_at = models.DateTimeField(null=True)
     finished_at = models.DateTimeField(null=True)
-    result = models.JSONField(
-        default=get_default_longrunningjob_result, blank=False, null=False
-    )
-    started_by = models.ForeignKey(
-        User, on_delete=models.SET(get_deleted_user), default=None
-    )
+    result = models.JSONField(default=get_default_longrunningjob_result,
+                              blank=False,
+                              null=False)
+    started_by = models.ForeignKey(User,
+                                   on_delete=models.SET(get_deleted_user),
+                                   default=None)

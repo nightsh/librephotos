@@ -20,19 +20,21 @@ from api.views.caching import (
 
 
 class DefaultRulesView(APIView):
+
     def get(self, request, format=None):
         res = DEFAULT_RULES_JSON
         return Response(res)
 
 
 class PredefinedRulesView(APIView):
+
     def get(self, request, format=None):
         res = PREDEFINED_RULES_JSON
         return Response(res)
 
 
 class RootPathTreeView(APIView):
-    permission_classes = (IsAdminUser,)
+    permission_classes = (IsAdminUser, )
 
     def get(self, request, format=None):
         try:
@@ -58,46 +60,44 @@ class UserViewSet(viewsets.ModelViewSet):
 
     serializer_class = UserSerializer
 
-    permission_classes = (IsUserOrReadOnly,)
+    permission_classes = (IsUserOrReadOnly, )
 
     def get_queryset(self):
-        queryset = (
-            User.objects.exclude(is_active=False)
-            .only(
-                "id",
-                "username",
-                "email",
-                "scan_directory",
-                "transcode_videos",
-                "confidence",
-                "semantic_search_topk",
-                "first_name",
-                "last_name",
-                "date_joined",
-                "avatar",
-                "nextcloud_server_address",
-                "nextcloud_username",
-                "nextcloud_scan_directory",
-                "favorite_min_rating",
-                "image_scale",
-                "save_metadata_to_disk",
-                "datetime_rules",
-                "default_timezone",
-            )
-            .order_by("-last_login")
-        )
+        queryset = (User.objects.exclude(is_active=False).only(
+            "id",
+            "username",
+            "email",
+            "scan_directory",
+            "transcode_videos",
+            "confidence",
+            "semantic_search_topk",
+            "first_name",
+            "last_name",
+            "date_joined",
+            "avatar",
+            "nextcloud_server_address",
+            "nextcloud_username",
+            "nextcloud_scan_directory",
+            "favorite_min_rating",
+            "image_scale",
+            "save_metadata_to_disk",
+            "datetime_rules",
+            "default_timezone",
+        ).order_by("-last_login"))
         return queryset
 
     def get_permissions(self):
         if self.action == "create":
-            self.permission_classes = [IsRegistrationAllowed | FirstTimeSetupPermission]
+            self.permission_classes = [
+                IsRegistrationAllowed | FirstTimeSetupPermission
+            ]
             cache.clear()
         elif self.action == "list":
-            self.permission_classes = (AllowAny,)
+            self.permission_classes = (AllowAny, )
         elif self.request.method == "GET" or self.request.method == "POST":
-            self.permission_classes = (AllowAny,)
+            self.permission_classes = (AllowAny, )
         else:
-            self.permission_classes = (IsUserOrReadOnly,)
+            self.permission_classes = (IsUserOrReadOnly, )
         return super(UserViewSet, self).get_permissions()
 
     @cache_response(CACHE_TTL, key_func=CustomObjectKeyConstructor())
@@ -112,7 +112,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class ManageUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by("-last_login")
     serializer_class = ManageUserSerializer
-    permission_classes = (IsAdminUser,)
+    permission_classes = (IsAdminUser, )
 
     @cache_response(CACHE_TTL, key_func=CustomObjectKeyConstructor())
     def retrieve(self, *args, **kwargs):
