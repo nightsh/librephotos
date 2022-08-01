@@ -9,6 +9,7 @@ from nextcloud.directory_watcher import scan_photos
 
 
 class ListDir(APIView):
+
     def get(self, request, format=None):
         if not request.query_params.get("fpath"):
             return Response(status=400)
@@ -18,19 +19,14 @@ class ListDir(APIView):
             return Response(status=400)
 
         nc = nextcloud.Client(request.user.nextcloud_server_address)
-        nc.login(request.user.nextcloud_username, request.user.nextcloud_app_password)
+        nc.login(request.user.nextcloud_username,
+                 request.user.nextcloud_app_password)
         try:
-            return Response(
-                [
-                    {
-                        "absolute_path": p.path,
-                        "title": p.path.split("/")[-2],
-                        "children": [],
-                    }
-                    for p in nc.list(path)
-                    if p.is_dir()
-                ]
-            )
+            return Response([{
+                "absolute_path": p.path,
+                "title": p.path.split("/")[-2],
+                "children": [],
+            } for p in nc.list(path) if p.is_dir()])
         except nextcloud.HTTPResponseError:
             return Response(status=400)
 
@@ -39,6 +35,7 @@ class ListDir(APIView):
 
 
 class ScanPhotosView(APIView):
+
     def get(self, request, format=None):
         try:
             job_id = uuid.uuid4()

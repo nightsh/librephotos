@@ -41,24 +41,21 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="longrunningjob",
             name="job_type",
-            field=models.PositiveIntegerField(
-                choices=[
-                    (1, "Scan Photos"),
-                    (2, "Generate Event Albums"),
-                    (3, "Regenerate Event Titles"),
-                    (4, "Train Faces"),
-                    (5, "Delete Missing Photos"),
-                    (7, "Scan Faces"),
-                    (6, "Calculate Clip Embeddings"),
-                ]
-            ),
+            field=models.PositiveIntegerField(choices=[
+                (1, "Scan Photos"),
+                (2, "Generate Event Albums"),
+                (3, "Regenerate Event Titles"),
+                (4, "Train Faces"),
+                (5, "Delete Missing Photos"),
+                (7, "Scan Faces"),
+                (6, "Calculate Clip Embeddings"),
+            ]),
         ),
         migrations.AlterField(
             model_name="longrunningjob",
             name="result",
-            field=models.JSONField(
-                default=api.models.long_running_job.get_default_longrunningjob_result
-            ),
+            field=models.JSONField(default=api.models.long_running_job.
+                                   get_default_longrunningjob_result),
         ),
         migrations.AlterField(
             model_name="photo",
@@ -83,8 +80,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="user",
             name="first_name",
-            field=models.CharField(
-                blank=True, max_length=150, verbose_name="first name"
-            ),
+            field=models.CharField(blank=True,
+                                   max_length=150,
+                                   verbose_name="first name"),
         ),
     ]

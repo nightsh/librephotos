@@ -18,27 +18,28 @@ class User(AbstractUser):
     semantic_search_topk = models.IntegerField(default=0)
     avatar = models.ImageField(upload_to="avatars", null=True)
     transcode_videos = models.BooleanField(default=False)
-    nextcloud_server_address = models.CharField(max_length=200, default=None, null=True)
-    nextcloud_username = models.CharField(max_length=64, default=None, null=True)
+    nextcloud_server_address = models.CharField(max_length=200,
+                                                default=None,
+                                                null=True)
+    nextcloud_username = models.CharField(max_length=64,
+                                          default=None,
+                                          null=True)
     nextcloud_app_password = encrypt(
-        models.CharField(max_length=64, default=None, null=True)
-    )
-    nextcloud_scan_directory = models.CharField(
-        max_length=512, db_index=True, null=True
-    )
+        models.CharField(max_length=64, default=None, null=True))
+    nextcloud_scan_directory = models.CharField(max_length=512,
+                                                db_index=True,
+                                                null=True)
 
     favorite_min_rating = models.IntegerField(
-        default=ownphotos.settings.DEFAULT_FAVORITE_MIN_RATING, db_index=True
-    )
+        default=ownphotos.settings.DEFAULT_FAVORITE_MIN_RATING, db_index=True)
 
-    SaveMetadataToDisk = models.TextChoices(
-        "SaveMetadataToDisk", "OFF MEDIA_FILE SIDECAR_FILE"
-    )
+    SaveMetadataToDisk = models.TextChoices("SaveMetadataToDisk",
+                                            "OFF MEDIA_FILE SIDECAR_FILE")
     save_metadata_to_disk = models.TextField(
-        choices=SaveMetadataToDisk.choices, default=SaveMetadataToDisk.OFF
-    )
+        choices=SaveMetadataToDisk.choices, default=SaveMetadataToDisk.OFF)
 
-    datetime_rules = models.JSONField(default=get_default_config_datetime_rules)
+    datetime_rules = models.JSONField(
+        default=get_default_config_datetime_rules)
     default_timezone = models.TextField(
         choices=[(x, x) for x in pytz.all_timezones],
         default="UTC",

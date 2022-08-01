@@ -17,14 +17,9 @@ def isValidNCMedia(file_obj):
     file_attr = file_obj.attributes
     filetype = file_attr.get("{DAV:}getcontenttype", "")
     try:
-        return (
-            "jpeg" in filetype
-            or "png" in filetype
-            or "bmp" in filetype
-            or "gif" in filetype
-            or "heic" in filetype
-            or "heif" in filetype
-        )
+        return ("jpeg" in filetype or "png" in filetype or "bmp" in filetype
+                or "gif" in filetype or "heic" in filetype
+                or "heif" in filetype)
     except Exception:
         util.logger.exception("An image throwed an exception")
         return False
@@ -70,9 +65,8 @@ def scan_photos(user, job_id):
             user.username,
             os.path.dirname(photo)[1:],
         )
-        local_path = os.path.join(
-            settings.DATA_ROOT, "nextcloud_media", user.username, photo[1:]
-        )
+        local_path = os.path.join(settings.DATA_ROOT, "nextcloud_media",
+                                  user.username, photo[1:])
         image_paths.append(local_path)
 
         if not os.path.exists(local_dir):
@@ -87,15 +81,22 @@ def scan_photos(user, job_id):
 
         image_paths_to_add = []
         for image_path in image_paths:
-            if not Photo.objects.filter(image_paths__contains=image_path).exists():
+            if not Photo.objects.filter(
+                    image_paths__contains=image_path).exists():
                 image_paths_to_add.append(image_path)
 
         added_photo_count = 0
         to_add_count = len(image_paths_to_add)
         for idx, image_path in enumerate(image_paths_to_add):
-            util.logger.info("begin handling of photo %d/%d" % (idx + 1, to_add_count))
+            util.logger.info("begin handling of photo %d/%d" %
+                             (idx + 1, to_add_count))
             handle_new_image(user, image_path, job_id)
-            lrj.result = {"progress": {"current": idx + 1, "target": to_add_count}}
+            lrj.result = {
+                "progress": {
+                    "current": idx + 1,
+                    "target": to_add_count
+                }
+            }
             lrj.save()
 
         util.logger.info("Added {} photos".format(len(image_paths_to_add)))

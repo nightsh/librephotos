@@ -41,9 +41,11 @@ class Places365:
         def hook_feature(module, input, output):
             self.features_blobs.append(np.squeeze(output.data.cpu().numpy()))
 
-        model_file = os.path.join(dir_places365_model, "wideresnet18_places365.pth.tar")
+        model_file = os.path.join(dir_places365_model,
+                                  "wideresnet18_places365.pth.tar")
         self.model = wideresnet.resnet18(num_classes=365)
-        checkpoint = torch.load(model_file, map_location=lambda storage, loc: storage)
+        checkpoint = torch.load(model_file,
+                                map_location=lambda storage, loc: storage)
         state_dict = {
             str.replace(k, "module.", ""): v
             for k, v in checkpoint["state_dict"].items()
@@ -61,9 +63,8 @@ class Places365:
     def load_labels(self):
         # prepare all the labels
         # scene category relevant
-        file_path_category = os.path.join(
-            dir_places365_model, "categories_places365.txt"
-        )
+        file_path_category = os.path.join(dir_places365_model,
+                                          "categories_places365.txt")
         self.classes = list()
         with open(file_path_category) as class_file:
             for line in class_file:
@@ -77,36 +78,34 @@ class Places365:
             self.labels_IO = []
             for line in lines:
                 items = line.rstrip().split()
-                self.labels_IO.append(int(items[-1]) - 1)  # 0 is indoor, 1 is outdoor
+                self.labels_IO.append(int(items[-1]) -
+                                      1)  # 0 is indoor, 1 is outdoor
         self.labels_IO = np.array(self.labels_IO)
 
         # scene attribute relevant
-        file_path_attribute = os.path.join(
-            dir_places365_model, "labels_sunattribute.txt"
-        )
+        file_path_attribute = os.path.join(dir_places365_model,
+                                           "labels_sunattribute.txt")
         with open(file_path_attribute) as f:
             lines = f.readlines()
             self.labels_attribute = [item.rstrip() for item in lines]
 
-        file_path_W = os.path.join(
-            dir_places365_model, "W_sceneattribute_wideresnet18.npy"
-        )
+        file_path_W = os.path.join(dir_places365_model,
+                                   "W_sceneattribute_wideresnet18.npy")
         self.W_attribute = np.load(file_path_W)
         self.labels_are_load = True
 
     def returnTF(self):
         # load the image transformer
-        tf = trn.Compose(
-            [
-                trn.Resize((224, 224)),
-                trn.ToTensor(),
-                trn.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-            ]
-        )
+        tf = trn.Compose([
+            trn.Resize((224, 224)),
+            trn.ToTensor(),
+            trn.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+        ])
         return tf
 
     def remove_nonspace_separators(self, text):
-        return " ".join(" ".join(" ".join(text.split("_")).split("/")).split("-"))
+        return " ".join(" ".join(" ".join(
+            text.split("_")).split("/")).split("-"))
 
     def inference_places365(self, img_path, confidence):
         """
@@ -162,8 +161,7 @@ class Places365:
             for i in range(0, 5):
                 if probs[i] > confidence:
                     res["categories"].append(
-                        self.remove_nonspace_separators(self.classes[idx[i]])
-                    )
+                        self.remove_nonspace_separators(self.classes[idx[i]]))
                 else:
                     break
             # TODO Should be replaced with more meaningful tags in the future
@@ -179,8 +177,8 @@ class Places365:
             res["attributes"] = []
             for i in range(-1, -10, -1):
                 res["attributes"].append(
-                    self.remove_nonspace_separators(self.labels_attribute[idx_a[i]])
-                )
+                    self.remove_nonspace_separators(
+                        self.labels_attribute[idx_a[i]]))
 
             return res
         except Exception:

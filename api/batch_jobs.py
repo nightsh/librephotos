@@ -36,8 +36,7 @@ def batch_calculate_clip_embedding(job_id, user):
     lrj.started_at = datetime.now().replace(tzinfo=pytz.utc)
 
     count = Photo.objects.filter(
-        Q(owner=user) & Q(clip_embeddings__isnull=True)
-    ).count()
+        Q(owner=user) & Q(clip_embeddings__isnull=True)).count()
     lrj.result = {"progress": {"current": 0, "target": count}}
     lrj.save()
 
@@ -52,10 +51,9 @@ def batch_calculate_clip_embedding(job_id, user):
         done_count = 0
         while done_count < count:
             objs = list(
-                Photo.objects.filter(Q(owner=user) & Q(clip_embeddings__isnull=True))[
-                    :BATCH_SIZE
-                ]
-            )
+                Photo.objects.filter(
+                    Q(owner=user)
+                    & Q(clip_embeddings__isnull=True))[:BATCH_SIZE])
             valid_objs = []
             for obj in objs:
                 if os.path.exists(obj.thumbnail_big.path):
@@ -65,10 +63,10 @@ def batch_calculate_clip_embedding(job_id, user):
                 break
 
             imgs_emb, magnitudes = semantic_search_instance.calculate_clip_embeddings(
-                imgs
-            )
+                imgs)
 
-            for obj, img_emb, magnitude in zip(valid_objs, imgs_emb, magnitudes):
+            for obj, img_emb, magnitude in zip(valid_objs, imgs_emb,
+                                               magnitudes):
                 obj.clip_embeddings = img_emb.tolist()
                 obj.clip_embeddings_magnitude = magnitude
                 obj.save()
@@ -84,4 +82,5 @@ def batch_calculate_clip_embedding(job_id, user):
         lrj.save()
 
     except Exception as e:
-        util.logger.error("Error in batch_calculate_clip_embedding: {}".format(e))
+        util.logger.error(
+            "Error in batch_calculate_clip_embedding: {}".format(e))

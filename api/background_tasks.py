@@ -9,7 +9,8 @@ def generate_captions(overwrite=False):
         photos = Photo.objects.all()
     else:
         photos = Photo.objects.filter(search_captions=None)
-    logger.info("%d photos to be processed for caption generation" % photos.count())
+    logger.info("%d photos to be processed for caption generation" %
+                photos.count())
     for photo in photos:
         logger.info("generating captions for %s" % photo.image_path)
         photo._generate_captions()

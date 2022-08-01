@@ -22,12 +22,15 @@ class Person(models.Model):
     )
     name = models.CharField(blank=False, max_length=128)
     kind = models.CharField(choices=KIND_CHOICES, max_length=10)
-    account = models.OneToOneField(
-        User, on_delete=models.SET(get_deleted_user), default=None, null=True
-    )
-    cover_photo = models.ForeignKey(
-        Photo, related_name="person", on_delete=models.PROTECT, blank=False, null=True
-    )
+    account = models.OneToOneField(User,
+                                   on_delete=models.SET(get_deleted_user),
+                                   default=None,
+                                   null=True)
+    cover_photo = models.ForeignKey(Photo,
+                                    related_name="person",
+                                    on_delete=models.PROTECT,
+                                    blank=False,
+                                    null=True)
 
     cluster_owner = models.ForeignKey(
         User,
@@ -45,25 +48,22 @@ class Person(models.Model):
             self.faces.prefetch_related(
                 Prefetch(
                     "photo",
-                    queryset=Photo.objects.exclude(image_hash=None)
-                    .filter(hidden=False, owner=owner)
-                    .order_by("-exif_timestamp")
-                    .only(
-                        "image_hash",
-                        "exif_timestamp",
-                        "rating",
-                        "owner__id",
-                        "public",
-                        "hidden",
-                    )
-                    .prefetch_related("owner"),
-                )
-            )
-        )
+                    queryset=Photo.objects.exclude(image_hash=None).filter(
+                        hidden=False,
+                        owner=owner).order_by("-exif_timestamp").only(
+                            "image_hash",
+                            "exif_timestamp",
+                            "rating",
+                            "owner__id",
+                            "public",
+                            "hidden",
+                    ).prefetch_related("owner"),
+                )))
 
         photos = [face.photo for face in faces if hasattr(face.photo, "owner")]
         photos.sort(
-            key=lambda x: x.exif_timestamp or utc.localize(datetime.datetime.min),
+            key=lambda x: x.exif_timestamp or utc.localize(datetime.datetime.
+                                                           min),
             reverse=True,
         )
         return photos
@@ -71,8 +71,7 @@ class Person(models.Model):
 
 def get_unknown_person():
     unknown_person: Person = Person.objects.get_or_create(
-        name=Person.UNKNOWN_PERSON_NAME
-    )[0]
+        name=Person.UNKNOWN_PERSON_NAME)[0]
     if unknown_person.kind != Person.KIND_UNKNOWN:
         unknown_person.kind = Person.KIND_UNKNOWN
         unknown_person.save()
@@ -81,6 +80,7 @@ def get_unknown_person():
 
 def get_or_create_person(name, cluster_owner: User = None):
     if cluster_owner is not None:
-        return Person.objects.get_or_create(name=name, cluster_owner=cluster_owner)[0]
+        return Person.objects.get_or_create(name=name,
+                                            cluster_owner=cluster_owner)[0]
     else:
         return Person.objects.get_or_create(name=name)[0]

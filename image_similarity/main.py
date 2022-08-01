@@ -14,6 +14,7 @@ index = RetrievalIndex()
 
 
 class BuildIndex(Resource):
+
     def post(self):
         request_body = json.loads(request.data)
 
@@ -23,10 +24,14 @@ class BuildIndex(Resource):
 
         index.build_index_for_user(user_id, image_hashes, image_embeddings)
 
-        return jsonify({"status": True, "index_size": index.indices[user_id].ntotal})
+        return jsonify({
+            "status": True,
+            "index_size": index.indices[user_id].ntotal
+        })
 
 
 class SearchIndex(Resource):
+
     def post(self):
         try:
             request_body = json.loads(request.data)

@@ -38,7 +38,8 @@ def nuke_people():
 
 
 faces = list(Face.objects.all())
-face_encodings = np.array([np.frombuffer(bytes.fromhex(f.encoding)) for f in faces])
+face_encodings = np.array(
+    [np.frombuffer(bytes.fromhex(f.encoding)) for f in faces])
 
 num_groups = []
 for _ in tqdm(range(50)):
@@ -54,9 +55,9 @@ for _ in tqdm(range(50)):
             for group_idx, group in enumerate(groups):
                 face_group_repr = group[0]
                 encoding_face_group_repr = get_face_encoding(face_group_repr)
-                if face_recognition.compare_faces(
-                    [encoding_face_group_repr], encoding_face_curr, tolerance=0.65
-                )[0]:
+                if face_recognition.compare_faces([encoding_face_group_repr],
+                                                  encoding_face_curr,
+                                                  tolerance=0.65)[0]:
                     group_this_face_belongs_to = group_idx
 
             if group_this_face_belongs_to:
@@ -67,10 +68,10 @@ for _ in tqdm(range(50)):
 
 num_people = int(np.mean(num_groups))
 
-
 if False:
     faces = Face.objects.all()
-    face_encodings = np.array([np.frombuffer(bytes.fromhex(f.encoding)) for f in faces])
+    face_encodings = np.array(
+        [np.frombuffer(bytes.fromhex(f.encoding)) for f in faces])
 
     # Linkage clustering
     Z = AgglomerativeClustering(linkage="ward", n_clusters=num_people)
@@ -84,7 +85,8 @@ if False:
 if True:
     nuke_people()
     faces = list(Face.objects.all())
-    face_encodings = np.array([np.frombuffer(bytes.fromhex(f.encoding)) for f in faces])
+    face_encodings = np.array(
+        [np.frombuffer(bytes.fromhex(f.encoding)) for f in faces])
     X = StandardScaler().fit_transform(face_encodings)
 
     bandwidth = estimate_bandwidth(X, quantile=0.1, n_samples=500)
@@ -92,12 +94,12 @@ if True:
     ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
     ms.fit(X)
 
-
 # DBSCAN
 if False:
     nuke_people()
     faces = list(Face.objects.all())
-    face_encodings = np.array([np.frombuffer(bytes.fromhex(f.encoding)) for f in faces])
+    face_encodings = np.array(
+        [np.frombuffer(bytes.fromhex(f.encoding)) for f in faces])
     X = StandardScaler().fit_transform(face_encodings)
 
     # #############################################################################
@@ -128,12 +130,11 @@ if False:
 
             for group_idx, group in enumerate(groups):
                 encoding_face_group_repr = np.array(
-                    [get_face_encoding(f) for f in group]
-                ).mean(0)
+                    [get_face_encoding(f) for f in group]).mean(0)
 
-                if face_recognition.compare_faces(
-                    [encoding_face_group_repr], encoding_face_curr, tolerance=0.6
-                )[0]:
+                if face_recognition.compare_faces([encoding_face_group_repr],
+                                                  encoding_face_curr,
+                                                  tolerance=0.6)[0]:
                     group_this_face_belongs_to = group_idx
 
             if group_this_face_belongs_to:
@@ -146,7 +147,6 @@ if False:
         for face in group:
             face.person = person
             face.save()
-
 
 # gaussian mixture model for face clustering / classification
 # and using BIC to compute the optimal number of classes
@@ -161,9 +161,8 @@ if False:
     for cv_type in cv_types:
         for n_components in tqdm(n_components_range):
             # Fit a Gaussian mixture with EM
-            gmm = mixture.GaussianMixture(
-                n_components=n_components, covariance_type=cv_type
-            )
+            gmm = mixture.GaussianMixture(n_components=n_components,
+                                          covariance_type=cv_type)
             gmm.fit(X)
             bic.append(gmm.bic(X))
             if bic[-1] < lowest_bic:
@@ -181,22 +180,17 @@ if False:
         xpos = np.array(n_components_range) + 0.2 * (i - 2)
         start = i * len(n_components_range)
         end = (i + 1) * len(n_components_range)
-        bars.append(
-            plt.bar(
-                xpos,
-                bic[start:end],
-                width=0.2,
-                color=color,
-            )
-        )
+        bars.append(plt.bar(
+            xpos,
+            bic[start:end],
+            width=0.2,
+            color=color,
+        ))
     plt.xticks(n_components_range)
     plt.ylim([bic.min() * 1.01 - 0.01 * bic.max(), bic.max()])
     plt.title("BIC score per model")
-    xpos = (
-        np.mod(bic.argmin(), len(n_components_range))
-        + 0.65
-        + 0.2 * np.floor(bic.argmin() / len(n_components_range))
-    )
+    xpos = (np.mod(bic.argmin(), len(n_components_range)) + 0.65 +
+            0.2 * np.floor(bic.argmin() / len(n_components_range)))
     plt.text(xpos, bic.min() * 0.97 + 0.03 * bic.max(), "*", fontsize=14)
     spl.set_xlabel("Number of components")
     spl.legend([b[0] for b in bars], cv_types)
@@ -204,9 +198,8 @@ if False:
     # Plot the winner
     splot = plt.subplot(2, 1, 2)
     Y_ = clf.predict(X)
-    for i, (mean, cov, color) in enumerate(
-        zip(clf.means_, clf.covariances_, color_iter)
-    ):
+    for i, (mean, cov,
+            color) in enumerate(zip(clf.means_, clf.covariances_, color_iter)):
         # v, w = linalg.eigh(cov)
         if not np.any(Y_ == i):
             continue
@@ -226,7 +219,6 @@ if False:
         face.person_label_is_inferred = True
         face.save()
 
-
 # p = Photo.objects.first()
 # image_path = p.image_path
 # captions = {}
@@ -234,7 +226,6 @@ if False:
 #     encoded_string = base64.b64encode(image_file.read())
 # encoded_string = str(encoded_string)[2:-1]
 # resp_captions = requests.post('http://localhost:5001/longcaptions/',data=encoded_string)
-
 
 # faces = Face.objects.all()
 # face_encodings = [np.frombuffer(bytes.fromhex(f.encoding)) for f in faces]
@@ -245,7 +236,6 @@ if False:
 # face_embedded = TSNE(n_components=2,n_iter=100000,verbose=1,perplexity=50).fit_transform(face_encodings)
 # plt.scatter(face_embedded[:,0],face_embedded[:,1],c=colors)
 # plt.show()
-
 
 # start = datetime.now()
 # qs = AlbumDate.objects.all().order_by('date').prefetch_related(
@@ -260,7 +250,6 @@ if False:
 # start = datetime.now()
 # res = AlbumDateListWithPhotoHashSerializer(qs_res,many=True).data
 # print('drf serializing took %.2f seconds'%(datetime.now()-start).total_seconds())
-
 
 # SELECT ("api_albumdate_photos"."albumdate_id") AS "_prefetch_related_val_albumdate_id",
 #        "api_photo"."image_hash",

@@ -13,18 +13,17 @@ import datetime
 import os
 
 for envvar in (
-    "SECRET_KEY",
-    "BACKEND_HOST",
-    "DB_BACKEND",
-    "DB_NAME",
-    "DB_USER",
-    "DB_PASS",
-    "DB_HOST",
-    "DB_PORT",
+        "SECRET_KEY",
+        "BACKEND_HOST",
+        "DB_BACKEND",
+        "DB_NAME",
+        "DB_USER",
+        "DB_PASS",
+        "DB_HOST",
+        "DB_PORT",
 ):
     if envvar not in os.environ:
         raise NameError("Environnement variable not set :" + envvar)
-
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -74,14 +73,14 @@ CONSTANCE_DATABASE_CACHE_BACKEND = "default"
 
 # Must be less or egal of nb core CPU ( Nearly 2GB per process)
 HEAVYWEIGHT_PROCESS_ENV = os.environ.get("HEAVYWEIGHT_PROCESS", "1")
-HEAVYWEIGHT_PROCESS = (
-    int(HEAVYWEIGHT_PROCESS_ENV) if HEAVYWEIGHT_PROCESS_ENV.isnumeric() else 1
-)
+HEAVYWEIGHT_PROCESS = (int(HEAVYWEIGHT_PROCESS_ENV)
+                       if HEAVYWEIGHT_PROCESS_ENV.isnumeric() else 1)
 
 CONSTANCE_CONFIG = {
     "ALLOW_REGISTRATION": (False, "Publicly allow user registration", bool),
     "ALLOW_UPLOAD": (
-        not os.environ.get("ALLOW_UPLOAD", "True") in ("false", "False", "0", "f"),
+        not os.environ.get("ALLOW_UPLOAD", "True")
+        in ("false", "False", "0", "f"),
         "Allow uploading files",
         bool,
     ),
@@ -95,7 +94,8 @@ CONSTANCE_CONFIG = {
         "Number of workers, when scanning pictures. This setting can dramatically affect the ram usage. Each worker needs 800MB of RAM. Change at your own will. Default is 1.",
         int,
     ),
-    "MAP_API_KEY": (os.environ.get("MAPBOX_API_KEY", ""), "Map Box API Key", str),
+    "MAP_API_KEY": (os.environ.get("MAPBOX_API_KEY",
+                                   ""), "Map Box API Key", str),
     "IMAGE_DIRS": ("/data", "Image dirs list (serialized json)", str),
 }
 
@@ -119,22 +119,30 @@ CORS_ALLOW_HEADERS = (
 CORS_ALLOWED_ORIGINS = ("http://localhost:3000", "http://192.168.1.100:3000")
 
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PERMISSION_CLASSES":
+    ("rest_framework.permissions.IsAuthenticated", ),
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
     ),
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "EXCEPTION_HANDLER": "api.views.views.custom_exception_handler",
-    "PAGE_SIZE": 20000,
+    "DEFAULT_SCHEMA_CLASS":
+    "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_FILTER_BACKENDS":
+    ("django_filters.rest_framework.DjangoFilterBackend", ),
+    "DEFAULT_PAGINATION_CLASS":
+    "rest_framework.pagination.LimitOffsetPagination",
+    "EXCEPTION_HANDLER":
+    "api.views.views.custom_exception_handler",
+    "PAGE_SIZE":
+    20000,
 }
 
 REST_FRAMEWORK_EXTENSIONS = {
-    "DEFAULT_OBJECT_CACHE_KEY_FUNC": "rest_framework_extensions.utils.default_object_cache_key_func",
-    "DEFAULT_LIST_CACHE_KEY_FUNC": "rest_framework_extensions.utils.default_list_cache_key_func",
+    "DEFAULT_OBJECT_CACHE_KEY_FUNC":
+    "rest_framework_extensions.utils.default_object_cache_key_func",
+    "DEFAULT_LIST_CACHE_KEY_FUNC":
+    "rest_framework_extensions.utils.default_list_cache_key_func",
 }
 
 MIDDLEWARE = [
@@ -234,16 +242,20 @@ RQ = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -294,7 +306,6 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 
 IMAGE_SIMILARITY_SERVER = "http://localhost:8002"
-
 
 LOGGING = {
     "version": 1,

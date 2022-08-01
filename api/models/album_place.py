@@ -9,11 +9,12 @@ class AlbumPlace(models.Model):
     photos = models.ManyToManyField(Photo)
     geolocation_level = models.IntegerField(db_index=True, null=True)
     favorited = models.BooleanField(default=False, db_index=True)
-    owner = models.ForeignKey(
-        User, on_delete=models.SET(get_deleted_user), default=None
-    )
+    owner = models.ForeignKey(User,
+                              on_delete=models.SET(get_deleted_user),
+                              default=None)
 
-    shared_to = models.ManyToManyField(User, related_name="album_place_shared_to")
+    shared_to = models.ManyToManyField(User,
+                                       related_name="album_place_shared_to")
 
     class Meta:
         unique_together = ("title", "owner")
