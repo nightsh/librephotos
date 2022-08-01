@@ -14,15 +14,16 @@ class AlbumUserSerializerSerpy(serpy.Serializer):
     id = serpy.StrField()
     title = serpy.StrField()
     owner = SimpleUserSerializerSerpy()
-    shared_to = SimpleUserSerializerSerpy(many=True, call=True, attr="shared_to.all")
+    shared_to = SimpleUserSerializerSerpy(many=True,
+                                          call=True,
+                                          attr="shared_to.all")
     date = serpy.MethodField("get_date")
     location = serpy.MethodField("get_location")
     grouped_photos = serpy.MethodField("get_photos")
 
     def get_photos(self, obj):
         grouped_photos = get_photos_ordered_by_date(
-            obj.photos.all().order_by("-exif_timestamp")
-        )
+            obj.photos.all().order_by("-exif_timestamp"))
         res = GroupedPhotosSerializer(grouped_photos, many=True).data
         return res
 
@@ -41,9 +42,9 @@ class AlbumUserSerializerSerpy(serpy.Serializer):
 
 
 class AlbumUserEditSerializer(serializers.ModelSerializer):
-    photos = serializers.PrimaryKeyRelatedField(
-        many=True, read_only=False, queryset=Photo.objects.all()
-    )
+    photos = serializers.PrimaryKeyRelatedField(many=True,
+                                                read_only=False,
+                                                queryset=Photo.objects.all())
     removedPhotos = serializers.ListField(
         child=serializers.CharField(max_length=100, default=""),
         write_only=True,
@@ -75,7 +76,8 @@ class AlbumUserEditSerializer(serializers.ModelSerializer):
             user = request.user
 
         # check if an album exists with the given title and call the update method if it does
-        instance, created = AlbumUser.objects.get_or_create(title=title, owner=user)
+        instance, created = AlbumUser.objects.get_or_create(title=title,
+                                                            owner=user)
         if not created:
             return self.update(instance, validated_data)
 
@@ -84,9 +86,8 @@ class AlbumUserEditSerializer(serializers.ModelSerializer):
             instance.photos.add(obj)
         instance.save()
         cache.clear()
-        logger.info(
-            "Created user album {} with {} photos".format(instance.id, len(photos))
-        )
+        logger.info("Created user album {} with {} photos".format(
+            instance.id, len(photos)))
         return instance
 
     def update(self, instance, validated_data):
@@ -105,7 +106,8 @@ class AlbumUserEditSerializer(serializers.ModelSerializer):
                     cnt += 1
                     instance.photos.remove(obj)
 
-            logger.info("Removed {} photos to user album {}".format(cnt, instance.id))
+            logger.info("Removed {} photos to user album {}".format(
+                cnt, instance.id))
 
         if "cover_photo" in validated_data.keys():
             cover_photo = validated_data["cover_photo"]
@@ -122,7 +124,8 @@ class AlbumUserEditSerializer(serializers.ModelSerializer):
                     cnt += 1
                     instance.photos.add(obj)
 
-            logger.info("Added {} photos to user album {}".format(cnt, instance.id))
+            logger.info("Added {} photos to user album {}".format(
+                cnt, instance.id))
 
         cache.clear()
         instance.save()
@@ -156,5 +159,6 @@ class AlbumUserListSerializer(serializers.ModelSerializer):
     def get_photo_count(self, obj):
         try:
             return obj.photo_count
-        except Exception:  # for when calling AlbumUserListSerializer(obj).data directly
+        # for when calling AlbumUserListSerializer(obj).data directly
+        except Exception:
             return obj.photos.count()

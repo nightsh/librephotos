@@ -17,9 +17,7 @@ def build_social_graph(user):
         from face f1 join face f2 using (photo_id)
         where f1.person_id != f2.person_id
         group by f1.name, f2.name
-    """.replace(
-        "{}", str(user.id)
-    )
+    """.replace("{}", str(user.id))
     G = nx.Graph()
     with connection.cursor() as cursor:
         cursor.execute(query)
@@ -30,16 +28,22 @@ def build_social_graph(user):
             G.add_edge(link[0], link[1])
     pos = nx.spring_layout(G, k=1 / 2, scale=1000, iterations=20)
     return {
-        "nodes": [{"id": node, "x": pos[0], "y": pos[1]} for node, pos in pos.items()],
-        "links": [{"source": pair[0], "target": pair[1]} for pair in G.edges()],
+        "nodes": [{
+            "id": node,
+            "x": pos[0],
+            "y": pos[1]
+        } for node, pos in pos.items()],
+        "links": [{
+            "source": pair[0],
+            "target": pair[1]
+        } for pair in G.edges()],
     }
 
 
 def build_ego_graph(person_id):
     G = nx.Graph()
-    person = Person.objects.prefetch_related("faces__photo__faces__person").filter(
-        id=person_id
-    )[0]
+    person = Person.objects.prefetch_related(
+        "faces__photo__faces__person").filter(id=person_id)[0]
     for this_person_face in person.faces.all():
         for other_person_face in this_person_face.photo.faces.all():
             G.add_edge(person.name, other_person_face.person.name)

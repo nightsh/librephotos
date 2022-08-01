@@ -11,8 +11,7 @@ def login(user):
         d = {"title": os.path.basename(path), "absolute_path": path}
         try:
             d["children"] = [
-                path_to_dict(os.path.join(path, x.path))
-                for x in nc.list(path)
+                path_to_dict(os.path.join(path, x.path)) for x in nc.list(path)
                 if x.is_dir()
             ]
         except Exception:

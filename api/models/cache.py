@@ -19,14 +19,14 @@ def change_api_updated_at(sender=None, instance=None, *args, **kwargs):
 
 # for cache invalidation. invalidates all cache on modelviewsets on delete and save on any model
 for model in [
-    Photo,
-    Person,
-    Face,
-    AlbumDate,
-    AlbumAuto,
-    AlbumUser,
-    AlbumPlace,
-    AlbumThing,
+        Photo,
+        Person,
+        Face,
+        AlbumDate,
+        AlbumAuto,
+        AlbumUser,
+        AlbumPlace,
+        AlbumThing,
 ]:
     post_save.connect(receiver=change_api_updated_at, sender=model)
     post_delete.connect(receiver=change_api_updated_at, sender=model)

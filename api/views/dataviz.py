@@ -28,12 +28,14 @@ class SocialGraphView(APIView):
 
 
 class StatsView(APIView):
+
     def get(self, request, format=None):
         res = get_count_stats(user=request.user)
         return Response(res)
 
 
 class LocationClustersView(APIView):
+
     def get(self, request, format=None):
         res = get_location_clusters(request.user)
         return Response(res)

@@ -25,4 +25,6 @@ class Migration(migrations.Migration):
 
     run_before = [("api", "0011_c_remove_favorited")]
 
-    operations = [migrations.RunPython(favorited_to_rating, rating_to_favorited)]
+    operations = [
+        migrations.RunPython(favorited_to_rating, rating_to_favorited)
+    ]

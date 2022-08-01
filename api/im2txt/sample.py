@@ -14,8 +14,10 @@ hidden_size = 512
 num_layers = 1
 im2txt_models_path = ownphotos.settings.IM2TXT_ROOT
 
-encoder_path = os.path.join(im2txt_models_path, "models", "encoder-10-1000.ckpt")
-decoder_path = os.path.join(im2txt_models_path, "models", "decoder-10-1000.ckpt")
+encoder_path = os.path.join(im2txt_models_path, "models",
+                            "encoder-10-1000.ckpt")
+decoder_path = os.path.join(im2txt_models_path, "models",
+                            "decoder-10-1000.ckpt")
 vocab_path = os.path.join(im2txt_models_path, "data", "vocab.pkl")
 
 # Device configuration
@@ -39,17 +41,14 @@ def load_image(image_path, transform=None):
 
 def im2txt(image_path):
     # Image preprocessing
-    transform = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-        ]
-    )
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+    ])
 
     # Build models
     encoder = EncoderCNN(
-        embed_size
-    ).eval()  # eval mode (batchnorm uses moving mean/variance)
+        embed_size).eval()  # eval mode (batchnorm uses moving mean/variance)
     decoder = DecoderRNN(embed_size, hidden_size, len(vocab), num_layers)
     encoder = encoder.to(device)
     decoder = decoder.to(device)
@@ -65,9 +64,8 @@ def im2txt(image_path):
     # Generate an caption from the image
     feature = encoder(image_tensor)
     sampled_ids = decoder.sample(feature)
-    sampled_ids = (
-        sampled_ids[0].cpu().numpy()
-    )  # (1, max_seq_length) -> (max_seq_length)
+    sampled_ids = (sampled_ids[0].cpu().numpy()
+                   )  # (1, max_seq_length) -> (max_seq_length)
 
     # Convert word_ids to words
     sampled_caption = []

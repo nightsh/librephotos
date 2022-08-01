@@ -16,6 +16,7 @@ CACHE_TTL_VIZ = 60 * 60  # 1 hour
 
 # caching stuff straight out of https://chibisov.github.io/drf-extensions/docs/#caching
 class UpdatedAtKeyBit(KeyBitBase):
+
     def get_data(self, **kwargs):
         key = "api_updated_at_timestamp"
         value = cache.get(key, None)

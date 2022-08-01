@@ -28,7 +28,8 @@ def search_similar_embedding(user, emb, result_count=100, threshold=27):
     if res.status_code == 200:
         return res.json()["result"]
     else:
-        logger.error("error retrieving similar embeddings for user {}".format(user_id))
+        logger.error(
+            "error retrieving similar embeddings for user {}".format(user_id))
         return []
 
 
@@ -53,23 +54,17 @@ def search_similar_image(user, photo, threshold=27):
         return res.json()
     else:
         logger.error(
-            "error retrieving similar photos to {} belonging to user {}".format(
-                photo.image_hash, user.username
-            )
-        )
+            "error retrieving similar photos to {} belonging to user {}".
+            format(photo.image_hash, user.username))
         return []
 
 
 def build_image_similarity_index(user):
     logger.info("builing similarity index for user {}".format(user.username))
     start = datetime.now()
-    photos = (
-        Photo.objects.filter(Q(hidden=False) & Q(owner=user))
-        .exclude(clip_embeddings=None)
-        .only("clip_embeddings", "image_hash")
-        .order_by("image_hash")
-        .all()
-    )
+    photos = (Photo.objects.filter(Q(hidden=False) & Q(owner=user)).exclude(
+        clip_embeddings=None).only("clip_embeddings",
+                                   "image_hash").order_by("image_hash").all())
     paginator = Paginator(photos, 5000)
 
     for page in range(1, paginator.num_pages + 1):

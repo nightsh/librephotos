@@ -16,6 +16,7 @@ from api.views.pagination import HugeResultsSetPagination, StandardResultsSetPag
 
 
 class ScanFacesView(APIView):
+
     def get(self, request, format=None):
         try:
             job_id = uuid.uuid4()
@@ -27,6 +28,7 @@ class ScanFacesView(APIView):
 
 
 class TrainFaceView(APIView):
+
     def get(self, request, format=None):
         try:
             job_id = uuid.uuid4()
@@ -54,15 +56,11 @@ class FaceInferredListViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Todo: optimze query by only prefetching relevant models & fields
-        queryset = (
-            Face.objects.filter(
-                Q(photo__hidden=False)
-                & Q(photo__owner=self.request.user)
-                & Q(person_label_is_inferred=True)
-            )
-            .select_related("person")
-            .order_by("id")
-        )
+        queryset = (Face.objects.filter(
+            Q(photo__hidden=False)
+            & Q(photo__owner=self.request.user)
+            & Q(person_label_is_inferred=True)).select_related(
+                "person").order_by("id"))
         return queryset
 
     def retrieve(self, *args, **kwargs):
@@ -78,15 +76,11 @@ class FaceLabeledListViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Todo: optimze query by only prefetching relevant models & fields
-        queryset = (
-            Face.objects.filter(
-                Q(photo__hidden=False) & Q(photo__owner=self.request.user),
-                Q(person_label_is_inferred=False)
-                | Q(person__name=Person.UNKNOWN_PERSON_NAME),
-            )
-            .select_related("person")
-            .order_by("id")
-        )
+        queryset = (Face.objects.filter(
+            Q(photo__hidden=False) & Q(photo__owner=self.request.user),
+            Q(person_label_is_inferred=False)
+            | Q(person__name=Person.UNKNOWN_PERSON_NAME),
+        ).select_related("person").order_by("id"))
         return queryset
 
     def retrieve(self, *args, **kwargs):
@@ -97,11 +91,8 @@ class FaceLabeledListViewSet(viewsets.ModelViewSet):
 
 
 class FaceViewSet(viewsets.ModelViewSet):
-    queryset = (
-        Face.objects.filter(Q(photo__hidden=False))
-        .prefetch_related("person")
-        .order_by("id")
-    )
+    queryset = (Face.objects.filter(
+        Q(photo__hidden=False)).prefetch_related("person").order_by("id"))
     serializer_class = FaceSerializer
     pagination_class = StandardResultsSetPagination
 
@@ -120,8 +111,7 @@ class FaceInferredViewSet(viewsets.ModelViewSet):
         return Face.objects.filter(
             Q(photo__hidden=False)
             & Q(photo__owner=self.request.user)
-            & Q(person_label_is_inferred=True)
-        ).order_by("id")
+            & Q(person_label_is_inferred=True)).order_by("id")
 
     def retrieve(self, *args, **kwargs):
         return super(FaceInferredViewSet, self).retrieve(*args, **kwargs)
@@ -138,8 +128,7 @@ class FaceLabeledViewSet(viewsets.ModelViewSet):
         return Face.objects.filter(
             Q(photo__hidden=False)
             & Q(photo__owner=self.request.user)
-            & Q(person_label_is_inferred=False)
-        ).order_by("id")
+            & Q(person_label_is_inferred=False)).order_by("id")
 
     def retrieve(self, *args, **kwargs):
         return super(FaceLabeledViewSet, self).retrieve(*args, **kwargs)
@@ -149,6 +138,7 @@ class FaceLabeledViewSet(viewsets.ModelViewSet):
 
 
 class SetFacePersonLabel(APIView):
+
     def post(self, request, format=None):
         data = dict(request.data)
         person = get_or_create_person(name=data["person_name"])
@@ -166,17 +156,16 @@ class SetFacePersonLabel(APIView):
             else:
                 not_updated.append(FaceListSerializer(face).data)
         cache.clear()
-        return Response(
-            {
-                "status": True,
-                "results": updated,
-                "updated": updated,
-                "not_updated": not_updated,
-            }
-        )
+        return Response({
+            "status": True,
+            "results": updated,
+            "updated": updated,
+            "not_updated": not_updated,
+        })
 
 
 class DeleteFaces(APIView):
+
     def post(self, request, format=None):
         data = dict(request.data)
         faces = Face.objects.in_bulk(data["face_ids"])
@@ -190,11 +179,9 @@ class DeleteFaces(APIView):
             else:
                 not_deleted.append(face.id)
         cache.clear()
-        return Response(
-            {
-                "status": True,
-                "results": deleted,
-                "not_deleted": not_deleted,
-                "deleted": deleted,
-            }
-        )
+        return Response({
+            "status": True,
+            "results": deleted,
+            "not_deleted": not_deleted,
+            "deleted": deleted,
+        })
