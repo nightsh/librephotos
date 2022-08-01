@@ -21,6 +21,7 @@ class SimpleUserSerializerSerpy(serpy.Serializer):
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = User
         fields = (
@@ -40,18 +41,42 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         extra_kwargs = {
-            "password": {"write_only": True},
-            "first_name": {"required": False},
-            "last_name": {"required": False},
-            "scan_directory": {"required": False},
-            "confidence": {"required": False},
-            "semantic_search_topk": {"required": False},
-            "nextcloud_server_address": {"required": False},
-            "nextcloud_username": {"required": False},
-            "nextcloud_scan_directory": {"required": False},
-            "nextcloud_app_password": {"write_only": True},
-            "favorite_min_rating": {"required": False},
-            "save_metadata_to_disk": {"required": False},
+            "password": {
+                "write_only": True
+            },
+            "first_name": {
+                "required": False
+            },
+            "last_name": {
+                "required": False
+            },
+            "scan_directory": {
+                "required": False
+            },
+            "confidence": {
+                "required": False
+            },
+            "semantic_search_topk": {
+                "required": False
+            },
+            "nextcloud_server_address": {
+                "required": False
+            },
+            "nextcloud_username": {
+                "required": False
+            },
+            "nextcloud_scan_directory": {
+                "required": False
+            },
+            "nextcloud_app_password": {
+                "write_only": True
+            },
+            "favorite_min_rating": {
+                "required": False
+            },
+            "save_metadata_to_disk": {
+                "required": False
+            },
         }
         fields = (
             "id",
@@ -120,28 +145,28 @@ class UserSerializer(serializers.ModelSerializer):
             instance.save()
         if "nextcloud_server_address" in validated_data:
             instance.nextcloud_server_address = validated_data.pop(
-                "nextcloud_server_address"
-            )
+                "nextcloud_server_address")
             instance.save()
         if "nextcloud_username" in validated_data:
-            instance.nextcloud_username = validated_data.pop("nextcloud_username")
+            instance.nextcloud_username = validated_data.pop(
+                "nextcloud_username")
             instance.save()
         if "nextcloud_app_password" in validated_data:
             instance.nextcloud_app_password = validated_data.pop(
-                "nextcloud_app_password"
-            )
+                "nextcloud_app_password")
             instance.save()
         if "nextcloud_scan_directory" in validated_data:
             instance.nextcloud_scan_directory = validated_data.pop(
-                "nextcloud_scan_directory"
-            )
+                "nextcloud_scan_directory")
             instance.save()
         if "confidence" in validated_data:
             instance.confidence = validated_data.pop("confidence")
             instance.save()
-            logger.info("Updated confidence for user {}".format(instance.confidence))
+            logger.info("Updated confidence for user {}".format(
+                instance.confidence))
         if "semantic_search_topk" in validated_data:
-            new_semantic_search_topk = validated_data.pop("semantic_search_topk")
+            new_semantic_search_topk = validated_data.pop(
+                "semantic_search_topk")
 
             if instance.semantic_search_topk == 0 and new_semantic_search_topk > 0:
                 create_batch_job(
@@ -151,47 +176,38 @@ class UserSerializer(serializers.ModelSerializer):
 
             instance.semantic_search_topk = new_semantic_search_topk
             instance.save()
-            logger.info(
-                "Updated semantic_search_topk for user {}".format(
-                    instance.semantic_search_topk
-                )
-            )
+            logger.info("Updated semantic_search_topk for user {}".format(
+                instance.semantic_search_topk))
         if "favorite_min_rating" in validated_data:
             new_favorite_min_rating = validated_data.pop("favorite_min_rating")
             instance.favorite_min_rating = new_favorite_min_rating
             instance.save()
-            logger.info(
-                "Updated favorite_min_rating for user {}".format(
-                    instance.favorite_min_rating
-                )
-            )
+            logger.info("Updated favorite_min_rating for user {}".format(
+                instance.favorite_min_rating))
         if "save_metadata_to_disk" in validated_data:
-            instance.save_metadata_to_disk = validated_data.pop("save_metadata_to_disk")
+            instance.save_metadata_to_disk = validated_data.pop(
+                "save_metadata_to_disk")
             instance.save()
-            logger.info(
-                "Updated save_metadata_to_disk for user {}".format(
-                    instance.save_metadata_to_disk
-                )
-            )
+            logger.info("Updated save_metadata_to_disk for user {}".format(
+                instance.save_metadata_to_disk))
         if "image_scale" in validated_data:
             new_image_scale = validated_data.pop("image_scale")
             instance.image_scale = new_image_scale
             instance.save()
-            logger.info("Updated image_scale for user {}".format(instance.image_scale))
+            logger.info("Updated image_scale for user {}".format(
+                instance.image_scale))
         if "datetime_rules" in validated_data:
             new_datetime_rules = validated_data.pop("datetime_rules")
             instance.datetime_rules = new_datetime_rules
             instance.save()
-            logger.info(
-                "Updated datetime_rules for user {}".format(instance.datetime_rules)
-            )
+            logger.info("Updated datetime_rules for user {}".format(
+                instance.datetime_rules))
         if "default_timezone" in validated_data:
             new_default_timezone = validated_data.pop("default_timezone")
             instance.default_timezone = new_default_timezone
             instance.save()
-            logger.info(
-                "Updated default_timezone for user {}".format(instance.default_timezone)
-            )
+            logger.info("Updated default_timezone for user {}".format(
+                instance.default_timezone))
         cache.clear()
         return instance
 
@@ -203,8 +219,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_public_photo_samples(self, obj):
         return PhotoSuperSimpleSerializer(
-            Photo.objects.filter(Q(owner=obj) & Q(public=True))[:10], many=True
-        ).data
+            Photo.objects.filter(Q(owner=obj) & Q(public=True))[:10],
+            many=True).data
 
     def get_avatar_url(self, obj):
         try:
@@ -232,7 +248,9 @@ class ManageUserSerializer(serializers.ModelSerializer):
             "save_metadata_to_disk",
         )
         extra_kwargs = {
-            "password": {"write_only": True},
+            "password": {
+                "write_only": True
+            },
         }
 
     def get_photo_count(self, obj):
@@ -244,9 +262,8 @@ class ManageUserSerializer(serializers.ModelSerializer):
             if os.path.exists(new_scan_directory):
                 instance.scan_directory = new_scan_directory
                 instance.save()
-                logger.info(
-                    "Updated scan directory for user {}".format(instance.scan_directory)
-                )
+                logger.info("Updated scan directory for user {}".format(
+                    instance.scan_directory))
             else:
                 raise ValidationError("Scan directory does not exist")
         cache.clear()

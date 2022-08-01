@@ -22,6 +22,7 @@ from api.util import logger
 
 
 class PhotoEditSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Photo
         fields = (
@@ -44,12 +45,14 @@ class PhotoEditSerializer(serializers.ModelSerializer):
 
 
 class PhotoHashListSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Photo
         fields = ("image_hash", "video")
 
 
 class PhotoSimpleSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Photo
         fields = (
@@ -137,7 +140,11 @@ class PhotoSerializer(serializers.ModelSerializer):
         else:
             emptyArray = {
                 "im2txt": "",
-                "places365": {"attributes": [], "categories": [], "environment": []},
+                "places365": {
+                    "attributes": [],
+                    "categories": [],
+                    "environment": []
+                },
             }
             return emptyArray
 
@@ -172,10 +179,11 @@ class PhotoSerializer(serializers.ModelSerializer):
             return None
 
     def get_people(self, obj):
-        return [
-            {"name": f.person.name, "face_url": f.image.url, "face_id": f.id}
-            for f in obj.faces.all()
-        ]
+        return [{
+            "name": f.person.name,
+            "face_url": f.image.url,
+            "face_id": f.id
+        } for f in obj.faces.all()]
 
 
 class PersonSerializer(serializers.ModelSerializer):
@@ -183,8 +191,12 @@ class PersonSerializer(serializers.ModelSerializer):
     face_count = serializers.SerializerMethodField()
     face_photo_url = serializers.SerializerMethodField()
     video = serializers.SerializerMethodField()
-    newPersonName = serializers.CharField(max_length=100, default="", write_only=True)
-    cover_photo = serializers.CharField(max_length=100, default="", write_only=True)
+    newPersonName = serializers.CharField(max_length=100,
+                                          default="",
+                                          write_only=True)
+    cover_photo = serializers.CharField(max_length=100,
+                                        default="",
+                                        write_only=True)
 
     class Meta:
         model = Person
@@ -205,8 +217,8 @@ class PersonSerializer(serializers.ModelSerializer):
     def get_face_url(self, obj):
         try:
             face = obj.faces.filter(
-                Q(person_label_is_inferred=False) & Q(photo__hidden=False)
-            ).first()
+                Q(person_label_is_inferred=False)
+                & Q(photo__hidden=False)).first()
             return face.image.url
         except Exception:
             return None
@@ -215,8 +227,8 @@ class PersonSerializer(serializers.ModelSerializer):
         if obj.cover_photo:
             return obj.cover_photo.image_hash
         first_face = obj.faces.filter(
-            Q(person_label_is_inferred=False) & Q(photo__hidden=False)
-        ).first()
+            Q(person_label_is_inferred=False)
+            & Q(photo__hidden=False)).first()
         if first_face:
             return first_face.photo.image_hash
         else:
@@ -226,8 +238,8 @@ class PersonSerializer(serializers.ModelSerializer):
         if obj.cover_photo:
             return obj.cover_photo.video
         first_face = obj.faces.filter(
-            Q(person_label_is_inferred=False) & Q(photo__hidden=False)
-        ).first()
+            Q(person_label_is_inferred=False)
+            & Q(photo__hidden=False)).first()
         if first_face:
             return first_face.photo.video
         else:
@@ -319,18 +331,15 @@ class FaceSerializer(serializers.ModelSerializer):
             p.save()
             instance.person = p
             logger.info("created person with name %s" % name)
-        if (
-            instance.person.name == "unknown"
-            or instance.person.name == Person.UNKNOWN_PERSON_NAME
-        ):
+        if (instance.person.name == "unknown"
+                or instance.person.name == Person.UNKNOWN_PERSON_NAME):
             instance.person_label_is_inferred = None
             instance.person_label_probability = 0.0
         else:
             instance.person_label_is_inferred = False
             instance.person_label_probability = 1.0
-        logger.info(
-            "updated label for face %d to %s" % (instance.id, instance.person.name)
-        )
+        logger.info("updated label for face %d to %s" %
+                    (instance.id, instance.person.name))
         cache.clear()
         instance.save()
         return instance
@@ -350,7 +359,8 @@ class AlbumPlaceListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AlbumPlace
-        fields = ("id", "geolocation_level", "cover_photos", "title", "photo_count")
+        fields = ("id", "geolocation_level", "cover_photos", "title",
+                  "photo_count")
 
     def get_photo_count(self, obj):
         return obj.photo_count
@@ -401,14 +411,16 @@ class AlbumPersonListSerializer(serializers.ModelSerializer):
         return obj.filter(Q(person_label_is_inferred=False)).faces.count()
 
     def get_cover_photo_url(self, obj):
-        first_face = obj.faces.filter(Q(person_label_is_inferred=False)).first()
+        first_face = obj.faces.filter(
+            Q(person_label_is_inferred=False)).first()
         if first_face:
             return first_face.photo.square_thumbnail.url
         else:
             return None
 
     def get_face_photo_url(self, obj):
-        first_face = obj.faces.filter(Q(person_label_is_inferred=False)).first()
+        first_face = obj.faces.filter(
+            Q(person_label_is_inferred=False)).first()
         if first_face:
             return first_face.photo.image.url
         else:
@@ -438,10 +450,8 @@ class AlbumAutoSerializer(serializers.ModelSerializer):
             Prefetch(
                 "faces__person",
                 queryset=Person.objects.all().annotate(
-                    viewable_face_count=Count("faces")
-                ),
-            )
-        )
+                    viewable_face_count=Count("faces")),
+            ))
 
         res = []
         for photo in photos:

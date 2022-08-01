@@ -45,6 +45,7 @@ from nextcloud import views as nextcloud_views
 
 
 class TokenObtainPairSerializer(TokenObtainPairSerializer):
+
     @classmethod
     def get_token(cls, user):
         token = super(TokenObtainPairSerializer, cls).get_token(user)
@@ -67,7 +68,8 @@ class TokenObtainPairView(TokenObtainPairView):
     serializer_class = TokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
-        response = super(TokenObtainPairView, self).post(request, *args, **kwargs)
+        response = super(TokenObtainPairView,
+                         self).post(request, *args, **kwargs)
         response.set_cookie("jwt", response.data["access"])
         response.set_cookie("test", "obtain")
         response["Access-Control-Allow-Credentials"] = True
@@ -90,33 +92,33 @@ router = routers.DefaultRouter()
 router.register(r"api/user", user.UserViewSet, basename="user")
 router.register(r"api/manage/user", user.ManageUserViewSet)
 
-router.register(
-    r"api/albums/auto/list", album_auto.AlbumAutoListViewSet, basename="album_auto"
-)
-router.register(
-    r"api/albums/date/list", albums.AlbumDateListViewSet, basename="album_date"
-)
+router.register(r"api/albums/auto/list",
+                album_auto.AlbumAutoListViewSet,
+                basename="album_auto")
+router.register(r"api/albums/date/list",
+                albums.AlbumDateListViewSet,
+                basename="album_date")
 router.register(
     r"api/albums/date/photohash/list",
     views.AlbumDateListWithPhotoHashViewSet,
     basename="album_date",
 )
-router.register(
-    r"api/albums/person/list", albums.AlbumPersonListViewSet, basename="person"
-)
-router.register(
-    r"api/albums/thing/list", albums.AlbumThingListViewSet, basename="album_thing"
-)
-router.register(
-    r"api/albums/place/list", albums.AlbumPlaceListViewSet, basename="album_place"
-)
-router.register(
-    r"api/albums/user/list", albums.AlbumUserListViewSet, basename="album_user"
-)
+router.register(r"api/albums/person/list",
+                albums.AlbumPersonListViewSet,
+                basename="person")
+router.register(r"api/albums/thing/list",
+                albums.AlbumThingListViewSet,
+                basename="album_thing")
+router.register(r"api/albums/place/list",
+                albums.AlbumPlaceListViewSet,
+                basename="album_place")
+router.register(r"api/albums/user/list",
+                albums.AlbumUserListViewSet,
+                basename="album_user")
 
-router.register(
-    r"api/albums/user/edit", views.AlbumUserEditViewSet, basename="album_user"
-)
+router.register(r"api/albums/user/edit",
+                views.AlbumUserEditViewSet,
+                basename="album_user")
 
 router.register(
     r"api/albums/user/shared/tome",
@@ -129,12 +131,24 @@ router.register(
     basename="album_user",
 )
 
-router.register(r"api/albums/auto", album_auto.AlbumAutoViewSet, basename="album_auto")
-router.register(r"api/albums/person", albums.AlbumPersonViewSet, basename="person")
-router.register(r"api/albums/date", albums.AlbumDateViewSet, basename="album_date")
-router.register(r"api/albums/thing", albums.AlbumThingViewSet, basename="album_thing")
-router.register(r"api/albums/place", albums.AlbumPlaceViewSet, basename="album_place")
-router.register(r"api/albums/user", albums.AlbumUserViewSet, basename="album_user")
+router.register(r"api/albums/auto",
+                album_auto.AlbumAutoViewSet,
+                basename="album_auto")
+router.register(r"api/albums/person",
+                albums.AlbumPersonViewSet,
+                basename="person")
+router.register(r"api/albums/date",
+                albums.AlbumDateViewSet,
+                basename="album_date")
+router.register(r"api/albums/thing",
+                albums.AlbumThingViewSet,
+                basename="album_thing")
+router.register(r"api/albums/place",
+                albums.AlbumPlaceViewSet,
+                basename="album_place")
+router.register(r"api/albums/user",
+                albums.AlbumUserViewSet,
+                basename="album_user")
 
 router.register(r"api/persons", albums.PersonViewSet, basename="person")
 
@@ -163,37 +177,47 @@ router.register(
 
 router.register(r"api/photos/edit", photos.PhotoEditViewSet, basename="photo")
 
-router.register(
-    r"api/photos/recentlyadded", photos.RecentlyAddedPhotoListViewSet, basename="photo"
-)
-router.register(
-    r"api/photos/simplelist", photos.PhotoSimpleListViewSet, basename="photo"
-)
-router.register(
-    r"api/photos/list", photos.PhotoSuperSimpleListViewSet, basename="photo"
-)
-router.register(
-    r"api/photos/favorites", photos.FavoritePhotoListViewset, basename="photo"
-)
-router.register(r"api/photos/hidden", photos.HiddenPhotoListViewset, basename="photo")
-router.register(r"api/photos/searchlist", search.SearchListViewSet, basename="photo")
+router.register(r"api/photos/recentlyadded",
+                photos.RecentlyAddedPhotoListViewSet,
+                basename="photo")
+router.register(r"api/photos/simplelist",
+                photos.PhotoSimpleListViewSet,
+                basename="photo")
+router.register(r"api/photos/list",
+                photos.PhotoSuperSimpleListViewSet,
+                basename="photo")
+router.register(r"api/photos/favorites",
+                photos.FavoritePhotoListViewset,
+                basename="photo")
+router.register(r"api/photos/hidden",
+                photos.HiddenPhotoListViewset,
+                basename="photo")
+router.register(r"api/photos/searchlist",
+                search.SearchListViewSet,
+                basename="photo")
 
-router.register(r"api/photos/public", photos.PublicPhotoListViewset, basename="photo")
+router.register(r"api/photos/public",
+                photos.PublicPhotoListViewset,
+                basename="photo")
 
 router.register(r"api/photos", photos.PhotoViewSet, basename="photo")
 
-router.register(
-    r"api/faces/inferred/list", faces.FaceInferredListViewSet, basename="face"
-)
+router.register(r"api/faces/inferred/list",
+                faces.FaceInferredListViewSet,
+                basename="face")
 
-router.register(
-    r"api/faces/labeled/list", faces.FaceLabeledListViewSet, basename="face"
-)
+router.register(r"api/faces/labeled/list",
+                faces.FaceLabeledListViewSet,
+                basename="face")
 
 router.register(r"api/faces/list", faces.FaceListViewSet, basename="face")
 
-router.register(r"api/faces/inferred", faces.FaceInferredViewSet, basename="face")
-router.register(r"api/faces/labeled", faces.FaceLabeledViewSet, basename="face")
+router.register(r"api/faces/inferred",
+                faces.FaceInferredViewSet,
+                basename="face")
+router.register(r"api/faces/labeled",
+                faces.FaceLabeledViewSet,
+                basename="face")
 router.register(r"api/faces", faces.FaceViewSet)
 
 router.register(r"api/exists", upload.UploadPhotoExists, basename="exists")
@@ -212,7 +236,8 @@ urlpatterns = [
     url(r"^api/photosedit/hide", photos.SetPhotosHidden.as_view()),
     url(r"^api/photosedit/makepublic", photos.SetPhotosPublic.as_view()),
     url(r"^api/photosedit/share", photos.SetPhotosShared.as_view()),
-    url(r"^api/photosedit/generateim2txt", photos.GeneratePhotoCaption.as_view()),
+    url(r"^api/photosedit/generateim2txt",
+        photos.GeneratePhotoCaption.as_view()),
     url(r"^api/useralbum/share", views.SetUserAlbumShared.as_view()),
     url(r"^api/trainfaces", faces.TrainFaceView.as_view()),
     url(r"^api/clusterfaces", dataviz.ClusterFaceView.as_view()),
@@ -223,7 +248,8 @@ urlpatterns = [
     url(r"^api/scanfaces", faces.ScanFacesView.as_view()),
     url(r"^api/deletemissingphotos", views.DeleteMissingPhotosView.as_view()),
     url(r"^api/autoalbumgen", album_auto.AutoAlbumGenerateView.as_view()),
-    url(r"^api/autoalbumtitlegen", album_auto.RegenerateAutoAlbumTitles.as_view()),
+    url(r"^api/autoalbumtitlegen",
+        album_auto.RegenerateAutoAlbumTitles.as_view()),
     url(r"^api/searchtermexamples", views.SearchTermExamples.as_view()),
     url(r"^api/locationsunburst", dataviz.LocationSunburst.as_view()),
     url(r"^api/locationtimeline", dataviz.LocationTimeline.as_view()),
@@ -244,7 +270,8 @@ urlpatterns = [
     url(r"^api/rqjobstat/$", jobs.RQJobStatView.as_view()),
     url(r"^api/rqjoblist/$", jobs.ListAllRQJobsView.as_view()),
     url(r"^api/nextcloud/listdir", nextcloud_views.ListDir.as_view()),
-    url(r"^api/nextcloud/scanphotos", nextcloud_views.ScanPhotosView.as_view()),
+    url(r"^api/nextcloud/scanphotos",
+        nextcloud_views.ScanPhotosView.as_view()),
     url(r"^api/photos/download", views.ZipListPhotosView.as_view()),
     url(r"^api/timezones", timezone.TimeZoneView.as_view()),
 ]
@@ -253,10 +280,10 @@ urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if site_config.ALLOW_UPLOAD:
     urlpatterns += [
-        url(r"api/upload/complete/", upload.UploadPhotosChunkedComplete.as_view())
+        url(r"api/upload/complete/",
+            upload.UploadPhotosChunkedComplete.as_view())
     ]
     urlpatterns += [url(r"api/upload/", upload.UploadPhotosChunked.as_view())]
-
 
 if settings.DEBUG:
     from drf_spectacular.views import (
@@ -268,6 +295,8 @@ if settings.DEBUG:
     urlpatterns += [url(r"^api/silk/", include("silk.urls", namespace="silk"))]
     urlpatterns += [
         url(r"^api/schema", SpectacularAPIView.as_view(), name="schema"),
-        url(r"^api/swagger", SpectacularSwaggerView.as_view(), name="swagger-ui"),
+        url(r"^api/swagger",
+            SpectacularSwaggerView.as_view(),
+            name="swagger-ui"),
         url(r"^api/redoc", SpectacularRedocView.as_view(), name="redoc"),
     ]

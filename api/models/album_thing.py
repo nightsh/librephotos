@@ -9,17 +9,17 @@ class AlbumThing(models.Model):
     photos = models.ManyToManyField(Photo)
     thing_type = models.CharField(max_length=512, db_index=True, null=True)
     favorited = models.BooleanField(default=False, db_index=True)
-    owner = models.ForeignKey(
-        User, on_delete=models.SET(get_deleted_user), default=None
-    )
+    owner = models.ForeignKey(User,
+                              on_delete=models.SET(get_deleted_user),
+                              default=None)
 
-    shared_to = models.ManyToManyField(User, related_name="album_thing_shared_to")
+    shared_to = models.ManyToManyField(User,
+                                       related_name="album_thing_shared_to")
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
-                fields=["title", "thing_type", "owner"], name="unique AlbumThing"
-            )
+            models.UniqueConstraint(fields=["title", "thing_type", "owner"],
+                                    name="unique AlbumThing")
         ]
 
     @property
@@ -71,9 +71,7 @@ def create_new_album_thing(cursor):
         from api_albumthing_sql
         left join api_albumthing using (title, thing_type, owner_id)
         where  api_albumthing is null;
-    """.replace(
-        "{}", view_api_album_thing_sql
-    )
+    """.replace("{}", view_api_album_thing_sql)
     cursor.execute(SQL)
 
 
@@ -86,9 +84,7 @@ def create_new_album_thing_photo(cursor):
         from api_albumthing_photos_sql
         left join api_albumthing_photos using (albumthing_id, photo_id)
         where  api_albumthing_photos is null;
-    """.replace(
-        "{}", view_api_album_thing_photos_sql
-    )
+    """.replace("{}", view_api_album_thing_photos_sql)
     cursor.execute(SQL)
 
 
@@ -105,9 +101,7 @@ def delete_album_thing_photo(cursor):
                 and photo_id = p.photo_id
             limit 1
         )
-    """.replace(
-        "{}", view_api_album_thing_photos_sql
-    )
+    """.replace("{}", view_api_album_thing_photos_sql)
     cursor.execute(SQL)
 
 
@@ -117,9 +111,7 @@ def delete_album_thing(cursor):
         with {}
         delete from api_albumthing
         where (title, thing_type, owner_id) not in ( select title, thing_type, owner_id from api_albumthing_sql );
-    """.replace(
-        "{}", view_api_album_thing_sql
-    )
+    """.replace("{}", view_api_album_thing_sql)
     cursor.execute(SQL)
 
 

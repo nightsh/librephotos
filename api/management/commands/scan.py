@@ -14,9 +14,10 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser_group = parser.add_mutually_exclusive_group()
-        parser_group.add_argument(
-            "-f", "--full-scan", help=("Run full directory scan"), action="store_true"
-        )
+        parser_group.add_argument("-f",
+                                  "--full-scan",
+                                  help=("Run full directory scan"),
+                                  action="store_true")
         parser_group.add_argument(
             "-n",
             "--nextcloud",
@@ -34,10 +35,8 @@ class Command(BaseCommand):
         deleted_user: User = get_deleted_user()
         for user in User.objects.all():
             if user != deleted_user:
-                scan_photos(
-                    user, options["full_scan"], uuid.uuid4(), user.scan_directory
-                )
-
+                scan_photos(user, options["full_scan"], uuid.uuid4(),
+                            user.scan_directory)
 
     def nextcloud_scan(self):
         for user in User.objects.all():

@@ -16,7 +16,6 @@ class Migration(migrations.Migration):
             model_name="user",
             name="config_datetime_rules",
             field=models.JSONField(
-                default=api.models.user.get_default_config_datetime_rules
-            ),
+                default=api.models.user.get_default_config_datetime_rules),
         ),
     ]

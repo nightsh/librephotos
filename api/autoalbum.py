@@ -42,7 +42,12 @@ def regenerate_event_titles(user, job_id):
             au._generate_title()
             au.save()
 
-            lrj.result = {"progress": {"current": idx + 1, "target": target_count}}
+            lrj.result = {
+                "progress": {
+                    "current": idx + 1,
+                    "target": target_count
+                }
+            }
             lrj.save()
 
         lrj.finished = True
@@ -77,18 +82,15 @@ def generate_event_albums(user, job_id):
         lrj.save()
 
     try:
-        photos = (
-            Photo.objects.filter(Q(owner=user))
-            .exclude(Q(exif_timestamp=None))
-            .only("exif_timestamp")
-        )
+        photos = (Photo.objects.filter(Q(owner=user)).exclude(
+            Q(exif_timestamp=None)).only("exif_timestamp"))
 
-        photos_with_timestamp = [
-            (photo.exif_timestamp, photo) for photo in photos if photo.exif_timestamp
-        ]
+        photos_with_timestamp = [(photo.exif_timestamp, photo)
+                                 for photo in photos if photo.exif_timestamp]
 
         def group(photos_with_timestamp, dt=timedelta(hours=6)):
-            photos_with_timestamp = sorted(photos_with_timestamp, key=lambda x: x[0])
+            photos_with_timestamp = sorted(photos_with_timestamp,
+                                           key=lambda x: x[0])
             groups = []
             for idx, photo in enumerate(photos_with_timestamp):
                 if len(groups) == 0:
@@ -113,19 +115,17 @@ def generate_event_albums(user, job_id):
         date_format = "%Y:%m:%d %H:%M:%S"
         for idx, group in enumerate(groups):
             key = group[0].exif_timestamp - timedelta(hours=11, minutes=59)
-            lastKey = group[-1].exif_timestamp + timedelta(hours=11, minutes=59)
+            lastKey = group[-1].exif_timestamp + timedelta(hours=11,
+                                                           minutes=59)
             logger.info(str(key.date) + " - " + str(lastKey.date))
             logger.info(
-                "job {}: processing auto album with date: ".format(job_id)
-                + key.strftime(date_format)
-                + " to "
-                + lastKey.strftime(date_format)
-            )
+                "job {}: processing auto album with date: ".format(job_id) +
+                key.strftime(date_format) + " to " +
+                lastKey.strftime(date_format))
             items = group
             if len(group) >= 2:
                 qs = AlbumAuto.objects.filter(owner=user).filter(
-                    timestamp__range=(key, lastKey)
-                )
+                    timestamp__range=(key, lastKey))
                 if qs.count() == 0:
                     album = AlbumAuto(
                         created_on=datetime.utcnow().replace(tzinfo=pytz.utc),
@@ -149,9 +149,8 @@ def generate_event_albums(user, job_id):
                         album_locations.append([])
                     album._generate_title()
                     album.save()
-                    logger.info(
-                        "job {}: generated auto album {}".format(job_id, album.id)
-                    )
+                    logger.info("job {}: generated auto album {}".format(
+                        job_id, album.id))
                 if qs.count() == 1:
                     album = qs.first()
                     for item in items:
@@ -161,18 +160,20 @@ def generate_event_albums(user, job_id):
                         item.save()
                     album._generate_title()
                     album.save()
-                    logger.info(
-                        "job {}: updated auto album {}".format(job_id, album.id)
-                    )
+                    logger.info("job {}: updated auto album {}".format(
+                        job_id, album.id))
                 if qs.count() > 1:
                     # To-Do: Merge both auto albums
                     logger.info(
-                        "job {}: found multiple auto albums for date {}".format(
-                            job_id, key.strftime(date_format)
-                        )
-                    )
+                        "job {}: found multiple auto albums for date {}".
+                        format(job_id, key.strftime(date_format)))
 
-            lrj.result = {"progress": {"current": idx + 1, "target": target_count}}
+            lrj.result = {
+                "progress": {
+                    "current": idx + 1,
+                    "target": target_count
+                }
+            }
             lrj.save()
 
         lrj.finished = True
@@ -206,7 +207,8 @@ def delete_missing_photos(user, job_id):
         )
         lrj.save()
     try:
-        missing_photos = Photo.objects.filter(Q(owner=user) & Q(image_paths=[]))
+        missing_photos = Photo.objects.filter(
+            Q(owner=user) & Q(image_paths=[]))
         for missing_photo in missing_photos:
             album_dates = AlbumDate.objects.filter(photos=missing_photo)
             for album_date in album_dates:

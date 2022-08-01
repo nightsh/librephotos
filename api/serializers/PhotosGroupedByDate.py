@@ -4,6 +4,7 @@ utc = pytz.UTC
 
 
 class PhotosGroupedByDate:
+
     def __init__(self, location, date, photos):
         self.photos = photos
         self.date = date
@@ -17,7 +18,8 @@ def get_photos_ordered_by_date(photos):
 
     for photo in photos:
         if photo.exif_timestamp:
-            groups[photo.exif_timestamp.date().strftime("%Y-%m-%d")].append(photo)
+            groups[photo.exif_timestamp.date().strftime("%Y-%m-%d")].append(
+                photo)
         else:
             groups[photo.exif_timestamp].append(photo)
 

@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
         migrations.RemoveField(model_name="Photo", name="thumbnail_tiny"),
         migrations.RemoveField(model_name="Photo", name="thumbnail_small"),
         migrations.RemoveField(model_name="Photo", name="thumbnail"),
-        migrations.RemoveField(model_name="Photo", name="square_thumbnail_tiny"),
-        migrations.RemoveField(model_name="Photo", name="square_thumbnail_big"),
+        migrations.RemoveField(model_name="Photo",
+                               name="square_thumbnail_tiny"),
+        migrations.RemoveField(model_name="Photo",
+                               name="square_thumbnail_big"),
     ]

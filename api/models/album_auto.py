@@ -16,11 +16,12 @@ class AlbumAuto(models.Model):
     gps_lon = models.FloatField(blank=True, null=True)
     photos = models.ManyToManyField(Photo)
     favorited = models.BooleanField(default=False, db_index=True)
-    owner = models.ForeignKey(
-        User, on_delete=models.SET(get_deleted_user), default=None
-    )
+    owner = models.ForeignKey(User,
+                              on_delete=models.SET(get_deleted_user),
+                              default=None)
 
-    shared_to = models.ManyToManyField(User, related_name="album_auto_shared_to")
+    shared_to = models.ManyToManyField(User,
+                                       related_name="album_auto_shared_to")
 
     class Meta:
         unique_together = ("timestamp", "owner")
@@ -54,10 +55,8 @@ class AlbumAuto(models.Model):
             timestamps = []
 
             for photo in photos:
-                if (
-                    photo.geolocation_json
-                    and "features" in photo.geolocation_json.keys()
-                ):
+                if (photo.geolocation_json
+                        and "features" in photo.geolocation_json.keys()):
                     for feature in photo.geolocation_json["features"]:
                         if feature["place_type"][0] == "place":
                             places.append(feature["text"])
@@ -70,29 +69,26 @@ class AlbumAuto(models.Model):
 
             if len(places) > 0:
                 cnts_places = Counter(places)
-                loc = "in " + " and ".join(dict(cnts_places.most_common(2)).keys())
+                loc = "in " + " and ".join(
+                    dict(cnts_places.most_common(2)).keys())
             if len(people) > 0:
                 cnts_people = Counter(people)
-                names = dict(
-                    [
-                        (k, v)
-                        for k, v in cnts_people.most_common(2)
-                        if k.lower() != "unknown"
-                        and k.lower() != Person.UNKNOWN_PERSON_NAME
-                    ]
-                ).keys()
+                names = dict([(k, v) for k, v in cnts_people.most_common(2)
+                              if k.lower() != "unknown"
+                              and k.lower() != Person.UNKNOWN_PERSON_NAME
+                              ]).keys()
                 if len(names) > 0:
                     pep = "with " + " and ".join(names)
             if len(timestamps) > 0:
                 if (max(timestamps) - min(timestamps)).days >= 3:
-                    when = "%d days" % ((max(timestamps) - min(timestamps)).days)
+                    when = "%d days" % (
+                        (max(timestamps) - min(timestamps)).days)
 
                 weekend = [5, 6]
-                if (
-                    max(timestamps).weekday() in weekend
-                    and min(timestamps).weekday() in weekend
-                    and not (max(timestamps).weekday() == min(timestamps).weekday())
-                ):
+                if (max(timestamps).weekday() in weekend
+                        and min(timestamps).weekday() in weekend
+                        and not (max(timestamps).weekday()
+                                 == min(timestamps).weekday())):
                     when = "Weekend"
 
             title = " ".join([when, pep, loc]).strip()

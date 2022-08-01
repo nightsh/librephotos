@@ -20,9 +20,10 @@ class Cluster(models.Model):
     cluster_id = models.IntegerField(null=True)
     name = models.TextField(null=True)
 
-    owner = models.ForeignKey(
-        User, on_delete=models.SET(get_deleted_user), default=None, null=True
-    )
+    owner = models.ForeignKey(User,
+                              on_delete=models.SET(get_deleted_user),
+                              default=None,
+                              null=True)
 
     def __str__(self):
         return "%d" % self.id
@@ -32,8 +33,7 @@ class Cluster(models.Model):
 
     def set_metadata(self, all_vectors):
         self.mean_face_encoding = (
-            Cluster.calculate_mean_face_encoding(all_vectors).tobytes().hex()
-        )
+            Cluster.calculate_mean_face_encoding(all_vectors).tobytes().hex())
 
     @staticmethod
     def get_or_create_cluster_by_name(user: User, name):
@@ -41,7 +41,8 @@ class Cluster(models.Model):
 
     @staticmethod
     def get_or_create_cluster_by_id(user: User, cluster_id: int):
-        return Cluster.objects.get_or_create(owner=user, cluster_id=cluster_id)[0]
+        return Cluster.objects.get_or_create(owner=user,
+                                             cluster_id=cluster_id)[0]
 
     @staticmethod
     def calculate_mean_face_encoding(all_encodings):
@@ -50,8 +51,7 @@ class Cluster(models.Model):
 
 def get_unknown_cluster() -> Cluster:
     unknown_cluster: Cluster = Cluster.get_or_create_cluster_by_id(
-        get_deleted_user(), UNKNOWN_CLUSTER_ID
-    )
+        get_deleted_user(), UNKNOWN_CLUSTER_ID)
     if unknown_cluster.person is None:
         unknown_cluster.person = get_unknown_person()
         unknown_cluster.name = UNKNOWN_CLUSTER_NAME

@@ -12,6 +12,7 @@ from api.semantic_search.semantic_search import semantic_search_instance
 
 
 class SemanticSearchFilter(filters.SearchFilter):
+
     def filter_queryset(self, request, queryset, view):
         search_fields = self.get_search_fields(view, request)
         search_terms = self.get_search_terms(request)
@@ -20,27 +21,34 @@ class SemanticSearchFilter(filters.SearchFilter):
             return queryset
 
         orm_lookups = [
-            self.construct_search(str(search_field)) for search_field in search_fields
+            self.construct_search(str(search_field))
+            for search_field in search_fields
         ]
 
         if request.user.semantic_search_topk > 0:
             query = request.query_params.get("search")
             start = datetime.datetime.now()
-            emb, magnitude = semantic_search_instance.calculate_query_embeddings(query)
+            emb, magnitude = semantic_search_instance.calculate_query_embeddings(
+                query)
             elapsed = (datetime.datetime.now() - start).total_seconds()
             util.logger.info(
-                "finished calculating query embedding - took %.2f seconds" % (elapsed)
-            )
+                "finished calculating query embedding - took %.2f seconds" %
+                (elapsed))
             start = datetime.datetime.now()
             image_hashes = search_similar_embedding(
-                request.user.id, emb, request.user.semantic_search_topk, threshold=27
-            )
+                request.user.id,
+                emb,
+                request.user.semantic_search_topk,
+                threshold=27)
             elapsed = (datetime.datetime.now() - start).total_seconds()
-            util.logger.info("search similar embedding - took %.2f seconds" % (elapsed))
+            util.logger.info("search similar embedding - took %.2f seconds" %
+                             (elapsed))
         base = queryset
         conditions = []
         for search_term in search_terms:
-            queries = [Q(**{orm_lookup: search_term}) for orm_lookup in orm_lookups]
+            queries = [
+                Q(**{orm_lookup: search_term}) for orm_lookup in orm_lookups
+            ]
 
             if request.user.semantic_search_topk > 0:
                 queries += [Q(image_hash__in=image_hashes)]

@@ -3,8 +3,9 @@ import math
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 
-__all__ = ["ResNet", "resnet18", "resnet34", "resnet50", "resnet101", "resnet152"]
-
+__all__ = [
+    "ResNet", "resnet18", "resnet34", "resnet50", "resnet101", "resnet152"
+]
 
 model_urls = {
     "resnet18": "https://download.pytorch.org/models/resnet18-5c106cde.pth",
@@ -17,9 +18,12 @@ model_urls = {
 
 def conv3x3(in_planes, out_planes, stride=1):
     "3x3 convolution with padding"
-    return nn.Conv2d(
-        in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False
-    )
+    return nn.Conv2d(in_planes,
+                     out_planes,
+                     kernel_size=3,
+                     stride=stride,
+                     padding=1,
+                     bias=False)
 
 
 class BasicBlock(nn.Module):
@@ -61,9 +65,12 @@ class Bottleneck(nn.Module):
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
-        self.conv2 = nn.Conv2d(
-            planes, planes, kernel_size=3, stride=stride, padding=1, bias=False
-        )
+        self.conv2 = nn.Conv2d(planes,
+                               planes,
+                               kernel_size=3,
+                               stride=stride,
+                               padding=1,
+                               bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
         self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
         self.bn3 = nn.BatchNorm2d(planes * 4)
@@ -95,10 +102,16 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
+
     def __init__(self, block, layers, num_classes=1000):
         self.inplanes = 64
         super(ResNet, self).__init__()
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        self.conv1 = nn.Conv2d(3,
+                               64,
+                               kernel_size=7,
+                               stride=2,
+                               padding=3,
+                               bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
         # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=1, padding=1) # previous stride is 2
@@ -165,7 +178,8 @@ def resnet18(pretrained=False, **kwargs):
     """
     model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls["resnet18"]), strict=False)
+        model.load_state_dict(model_zoo.load_url(model_urls["resnet18"]),
+                              strict=False)
     return model
 
 
@@ -177,7 +191,8 @@ def resnet34(pretrained=False, **kwargs):
     """
     model = ResNet(BasicBlock, [3, 4, 6, 3], **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls["resnet34"]), strict=False)
+        model.load_state_dict(model_zoo.load_url(model_urls["resnet34"]),
+                              strict=False)
     return model
 
 
@@ -189,7 +204,8 @@ def resnet50(pretrained=False, **kwargs):
     """
     model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls["resnet50"]), strict=False)
+        model.load_state_dict(model_zoo.load_url(model_urls["resnet50"]),
+                              strict=False)
     return model
 
 
@@ -201,7 +217,8 @@ def resnet101(pretrained=False, **kwargs):
     """
     model = ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls["resnet101"]), strict=False)
+        model.load_state_dict(model_zoo.load_url(model_urls["resnet101"]),
+                              strict=False)
     return model
 
 
@@ -213,5 +230,6 @@ def resnet152(pretrained=False, **kwargs):
     """
     model = ResNet(Bottleneck, [3, 8, 36, 3], **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls["resnet152"]), strict=False)
+        model.load_state_dict(model_zoo.load_url(model_urls["resnet152"]),
+                              strict=False)
     return model

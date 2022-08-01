@@ -12,7 +12,7 @@ from api.views.pagination import HugeResultsSetPagination
 class SearchListViewSet(viewsets.ModelViewSet):
     serializer_class = GroupedPhotosSerializer
     pagination_class = HugeResultsSetPagination
-    filter_backends = (SemanticSearchFilter,)
+    filter_backends = (SemanticSearchFilter, )
 
     search_fields = [
         "search_captions",
@@ -24,9 +24,8 @@ class SearchListViewSet(viewsets.ModelViewSet):
     ]
 
     def get_queryset(self):
-        return Photo.visible.filter(Q(owner=self.request.user)).order_by(
-            "-exif_timestamp"
-        )
+        return Photo.visible.filter(
+            Q(owner=self.request.user)).order_by("-exif_timestamp")
 
     def retrieve(self, *args, **kwargs):
         return super(SearchListViewSet, self).retrieve(*args, **kwargs)
@@ -34,30 +33,26 @@ class SearchListViewSet(viewsets.ModelViewSet):
     def list(self, request):
         if request.user.semantic_search_topk == 0:
             queryset = self.filter_queryset(
-                Photo.visible.filter(Q(owner=self.request.user))
-                .prefetch_related(
-                    Prefetch(
-                        "owner",
-                        queryset=User.objects.only(
-                            "id", "username", "first_name", "last_name"
-                        ),
-                    ),
-                )
-                .order_by("-exif_timestamp")
-            )
+                Photo.visible.filter(
+                    Q(owner=self.request.user)).prefetch_related(
+                        Prefetch(
+                            "owner",
+                            queryset=User.objects.only("id", "username",
+                                                       "first_name",
+                                                       "last_name"),
+                        ), ).order_by("-exif_timestamp"))
             grouped_photos = get_photos_ordered_by_date(queryset)
             serializer = GroupedPhotosSerializer(grouped_photos, many=True)
             return Response({"results": serializer.data})
         else:
             queryset = self.filter_queryset(
-                Photo.visible.filter(Q(owner=self.request.user)).prefetch_related(
-                    Prefetch(
-                        "owner",
-                        queryset=User.objects.only(
-                            "id", "username", "first_name", "last_name"
-                        ),
-                    ),
-                )
-            )
+                Photo.visible.filter(
+                    Q(owner=self.request.user)).prefetch_related(
+                        Prefetch(
+                            "owner",
+                            queryset=User.objects.only("id", "username",
+                                                       "first_name",
+                                                       "last_name"),
+                        ), ))
             serializer = PigPhotoSerilizer(queryset, many=True)
             return Response({"results": serializer.data})

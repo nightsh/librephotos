@@ -12,9 +12,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="Photo",
             name="clip_embeddings",
-            field=ArrayField(
-                models.FloatField(blank=True, null=True), size=512, null=True
-            ),
+            field=ArrayField(models.FloatField(blank=True, null=True),
+                             size=512,
+                             null=True),
         ),
         migrations.AddField(
             model_name="Photo",

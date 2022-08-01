@@ -25,9 +25,8 @@ from api.util import logger
 
 def get_current_job():
     job_detail = None
-    running_job = (
-        LongRunningJob.objects.filter(finished=False).order_by("-started_at").first()
-    )
+    running_job = (LongRunningJob.objects.filter(
+        finished=False).order_by("-started_at").first())
     if running_job:
         job_detail = LongRunningJobSerializer(running_job).data
     return job_detail
@@ -45,7 +44,8 @@ def is_hidden(filepath):
 
 def has_hidden_attribute(filepath):
     try:
-        return bool(os.stat(filepath).st_file_attributes & stat.FILE_ATTRIBUTE_HIDDEN)
+        return bool(
+            os.stat(filepath).st_file_attributes & stat.FILE_ATTRIBUTE_HIDDEN)
     except Exception:
         return False
 
@@ -55,8 +55,7 @@ def path_to_dict(path, recurse=2):
     if recurse > 0:
         d["children"] = [
             path_to_dict(os.path.join(path, x), recurse - 1)
-            for x in os.scandir(path)
-            if os.path.isdir(os.path.join(path, x))
+            for x in os.scandir(path) if os.path.isdir(os.path.join(path, x))
             and not is_hidden(os.path.join(path, x))
         ]
     else:
@@ -70,9 +69,8 @@ def jump_by_month(start_date, end_date, month_step=1):
     while current_date < end_date:
         carry, new_month = divmod(current_date.month - 1 + month_step, 12)
         new_month += 1
-        current_date = current_date.replace(
-            year=current_date.year + carry, month=new_month
-        )
+        current_date = current_date.replace(year=current_date.year + carry,
+                                            month=new_month)
         yield current_date
 
 
@@ -142,23 +140,20 @@ def get_location_timeline(user):
                 "coalesced";
         """
         cursor.execute(raw_sql, [user.id])
-        city_start_end_duration = [
-            (row[0], row[1], row[2], row[3]) for row in cursor.fetchall()
-        ]
+        city_start_end_duration = [(row[0], row[1], row[2], row[3])
+                                   for row in cursor.fetchall()]
 
     colors = sns.color_palette("Paired", len(city_start_end_duration)).as_hex()
 
     data = []
     for idx, sted in enumerate(city_start_end_duration):
-        data.append(
-            {
-                "data": [sted[3]],
-                "color": colors[idx],
-                "loc": sted[0],
-                "start": sted[1].timestamp(),
-                "end": sted[2].timestamp(),
-            }
-        )
+        data.append({
+            "data": [sted[3]],
+            "color": colors[idx],
+            "loc": sted[0],
+            "start": sted[1].timestamp(),
+            "end": sted[2].timestamp(),
+        })
     return data
 
 
@@ -177,12 +172,8 @@ def get_search_term_examples(user):
         possible_ids = random.choices(possible_ids, k=100)
     logger.info(f"{len(possible_ids)} possible ids")
     try:
-        samples = (
-            pp.filter(image_hash__in=possible_ids)
-            .prefetch_related("faces")
-            .prefetch_related("faces__person")
-            .all()
-        )
+        samples = (pp.filter(image_hash__in=possible_ids).prefetch_related(
+            "faces").prefetch_related("faces__person").all())
     except ValueError:
         return default_search_terms
 
@@ -195,8 +186,7 @@ def get_search_term_examples(user):
         terms_loc = ""
         if p.geolocation_json != {}:
             terms_loc = [
-                f["text"]
-                for f in p.geolocation_json["features"][-5:]
+                f["text"] for f in p.geolocation_json["features"][-5:]
                 if not f["text"].isdigit()
             ]
         terms_time = ""
@@ -240,17 +230,18 @@ def get_search_term_examples(user):
             if random.random() > 0.3:
                 search_terms.append(search_term_loc_people)
 
-            search_term_time_people = " ".join(shuffle([term_time, term_people]))
+            search_term_time_people = " ".join(
+                shuffle([term_time, term_people]))
             if random.random() > 0.3:
                 search_terms.append(search_term_time_people)
 
-            search_term_people_thing = " ".join(shuffle([term_people, term_thing]))
+            search_term_people_thing = " ".join(
+                shuffle([term_people, term_thing]))
             if random.random() > 0.9:
                 search_terms.append(search_term_people_thing)
 
             search_term_all = " ".join(
-                shuffle([term_loc, term_people, term_time, term_thing])
-            )
+                shuffle([term_loc, term_people, term_time, term_thing]))
             if random.random() > 0.95:
                 search_terms.append(search_term_all)
 
@@ -271,56 +262,34 @@ def get_search_term_examples(user):
 
 def get_count_stats(user):
     num_photos = Photo.visible.filter(Q(owner=user)).count()
-    num_missing_photos = Photo.objects.filter(Q(owner=user) & Q(image_paths=[])).count()
+    num_missing_photos = Photo.objects.filter(
+        Q(owner=user) & Q(image_paths=[])).count()
     num_faces = Face.objects.filter(photo__owner=user).count()
     num_unknown_faces = Face.objects.filter(
-        (
-            Q(person__name__exact="unknown")
-            | Q(person__name__exact=Person.UNKNOWN_PERSON_NAME)
-        )
-        & Q(photo__owner=user)
-    ).count()
+        (Q(person__name__exact="unknown")
+         | Q(person__name__exact=Person.UNKNOWN_PERSON_NAME))
+        & Q(photo__owner=user)).count()
     num_labeled_faces = Face.objects.filter(
         Q(person_label_is_inferred=False)
-        & ~(
-            Q(person__name__exact="unknown")
-            | Q(person__name__exact=Person.UNKNOWN_PERSON_NAME)
-        )
+        & ~(Q(person__name__exact="unknown")
+            | Q(person__name__exact=Person.UNKNOWN_PERSON_NAME))
         & Q(photo__owner=user)
-        & Q(photo__hidden=False)
-    ).count()
+        & Q(photo__hidden=False)).count()
     num_inferred_faces = Face.objects.filter(
-        Q(person_label_is_inferred=True) & Q(photo__owner=user) & Q(photo__hidden=False)
-    ).count()
-    num_people = (
-        Person.objects.filter(
-            Q(faces__photo__hidden=False)
-            & Q(faces__photo__owner=user)
-            & Q(faces__person_label_is_inferred=False)
-        )
-        .distinct()
-        .annotate(viewable_face_count=Count("faces"))
-        .filter(Q(viewable_face_count__gt=0))
-        .count()
-    )
-    num_albumauto = (
-        AlbumAuto.objects.filter(owner=user)
-        .annotate(photo_count=Count("photos"))
-        .filter(Q(photo_count__gt=0))
-        .count()
-    )
-    num_albumdate = (
-        AlbumDate.objects.filter(owner=user)
-        .annotate(photo_count=Count("photos"))
-        .filter(Q(photo_count__gt=0))
-        .count()
-    )
-    num_albumuser = (
-        AlbumUser.objects.filter(owner=user)
-        .annotate(photo_count=Count("photos"))
-        .filter(Q(photo_count__gt=0))
-        .count()
-    )
+        Q(person_label_is_inferred=True) & Q(photo__owner=user)
+        & Q(photo__hidden=False)).count()
+    num_people = (Person.objects.filter(
+        Q(faces__photo__hidden=False)
+        & Q(faces__photo__owner=user)
+        & Q(faces__person_label_is_inferred=False)).distinct().annotate(
+            viewable_face_count=Count("faces")).filter(
+                Q(viewable_face_count__gt=0)).count())
+    num_albumauto = (AlbumAuto.objects.filter(owner=user).annotate(
+        photo_count=Count("photos")).filter(Q(photo_count__gt=0)).count())
+    num_albumdate = (AlbumDate.objects.filter(owner=user).annotate(
+        photo_count=Count("photos")).filter(Q(photo_count__gt=0)).count())
+    num_albumuser = (AlbumUser.objects.filter(owner=user).annotate(
+        photo_count=Count("photos")).filter(Q(photo_count__gt=0)).count())
 
     res = {
         "num_photos": num_photos,
@@ -356,7 +325,8 @@ def get_location_clusters(user):
                 "location";
         """
         cursor.execute(raw_sql, [user.id])
-        res = [[float(row[2]), float(row[1]), row[0]] for row in cursor.fetchall()]
+        res = [[float(row[2]), float(row[1]), row[0]]
+               for row in cursor.fetchall()]
 
         elapsed = (datetime.now() - start).total_seconds()
         logger.info("location clustering took %.2f seconds" % elapsed)
@@ -410,7 +380,8 @@ def get_location_sunburst(user):
                 , "l3"
         """
         cursor.execute(raw_sql, [user.id])
-        levels = [[row[0], row[1], row[2], row[3]] for row in cursor.fetchall()]
+        levels = [[row[0], row[1], row[2], row[3]]
+                  for row in cursor.fetchall()]
 
     data_structure = {"name": "Places I've visited", "children": []}
     palette = sns.color_palette("hls", 10).as_hex()
@@ -424,37 +395,32 @@ def get_location_sunburst(user):
                 if item in c.values():
                     idx = j
             if idx is None:
-                depth_cursor.append(
-                    {"name": item, "children": [], "hex": random.choice(palette)}
-                )
+                depth_cursor.append({
+                    "name": item,
+                    "children": [],
+                    "hex": random.choice(palette)
+                })
                 idx = len(depth_cursor) - 1
 
             depth_cursor = depth_cursor[idx]["children"]
             if i == len(data) - 3:
-                depth_cursor.append(
-                    {
-                        "name": data[-2],
-                        "value": data[-1],
-                        "hex": random.choice(palette),
-                    }
-                )
+                depth_cursor.append({
+                    "name": data[-2],
+                    "value": data[-1],
+                    "hex": random.choice(palette),
+                })
 
     return data_structure
 
 
 def get_photo_month_counts(user):
-    counts = (
-        Photo.objects.filter(owner=user)
-        .exclude(exif_timestamp=None)
-        .annotate(month=TruncMonth("exif_timestamp"))
-        .values("month")
-        .annotate(c=Count("image_hash"))
-        .values("month", "c")
-    )
+    counts = (Photo.objects.filter(owner=user).exclude(
+        exif_timestamp=None).annotate(
+            month=TruncMonth("exif_timestamp")).values("month").annotate(
+                c=Count("image_hash")).values("month", "c"))
 
     all_months = [
-        c["month"]
-        for c in counts
+        c["month"] for c in counts
         if c["month"].year >= 2000 and c["month"].year <= datetime.now().year
     ]
 
@@ -468,7 +434,9 @@ def get_photo_month_counts(user):
 
         res = []
         for count in counts:
-            key = "-".join([str(count["month"].year), str(count["month"].month)])
+            key = "-".join(
+                [str(count["month"].year),
+                 str(count["month"].month)])
             count = count["c"]
             res.append([key, count])
         res = dict(res)
@@ -489,18 +457,14 @@ def get_photo_month_counts(user):
 def get_searchterms_wordcloud(user):
     query = {}
     out = {"captions": [], "people": [], "locations": []}
-    query[
-        "captions"
-    ] = """
+    query["captions"] = """
         with captionList as (
             select unnest(regexp_split_to_array(search_captions,' , ')) caption
             from api_photo where owner_id = %(userid)s
         )
         select caption, count(*) from captionList group by caption order by count(*) desc limit 100;
     """
-    query[
-        "people"
-    ] = """
+    query["people"] = """
         with NameList as (
             select api_person.name
             from api_photo join api_face on image_hash = api_face.photo_id
@@ -509,9 +473,7 @@ def get_searchterms_wordcloud(user):
         )
         select name, count(*) from NameList group by name order by count(*) desc limit 100;
     """
-    query[
-        "locations"
-    ] = """
+    query["locations"] = """
          with arrayloctable as (
             select jsonb_array_elements(jsonb_extract_path(api_photo.geolocation_json,  'features')::jsonb) arrayloc , image_hash
             from api_photo where owner_id = %(userid)s
